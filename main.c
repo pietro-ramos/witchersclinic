@@ -502,13 +502,26 @@ void menuTratamento()
                     printf("Falha ao iniciar o tratamento.\n");
                 }
                 break;
-
-            case 4:
-                // Ampliar tratamento
-                break;
-            case 5:
-                // Excluir tratamento
-                break;
+			case 4:
+			    codigo = get_int_input("Digite o código do Tratamento para ampliar: ");
+			    int duracaoAdicional = get_int_input("Digite a duração adicional para o tratamento: ");
+			
+			    if (AmpliarTratamento(codigo, duracaoAdicional)) {
+			        printf("Tratamento ampliado com sucesso!\n");
+			    } else {
+			        printf("Falha ao ampliar o tratamento ou tratamento não encontrado.\n");
+			    }
+			    break;
+			
+			case 5:
+			    codigo = get_int_input("Digite o código do Tratamento para excluir: ");
+			
+			    if (ExcluirTratamento(codigo)) {
+			        printf("Tratamento excluído com sucesso!\n");
+			    } else {
+			        printf("Falha ao excluir o tratamento ou tratamento não encontrado.\n");
+			    }
+			    break;
             default:
                 printf("Opcao invalida. Tente novamente.\n");
                 break;
