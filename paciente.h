@@ -17,6 +17,7 @@ Paciente* ObterPacientePeloIndice(int indice);
 void LiberarCopiaPaciente(Paciente* copiaPaciente);
 Paciente* ObterPacientePeloCodigo(int codigo);
 int AtualizarPaciente(Paciente p);
+int ModificarPacientePeloCodigo(int codigo, const char* novoNome, int novaIdade, float novaAltura);
 int ApagarPacientePeloCodigo(int codigo);
 
 #endif

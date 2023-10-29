@@ -16,6 +16,7 @@ int QuantidadeBruxos();
 Bruxo* ObterBruxoPeloIndice(int indice);
 void LiberarCopiaBruxo(Bruxo* copiaBruxo);
 Bruxo* ObterBruxoPeloCodigo(int codigo);
+int ModificarBruxoPeloCodigo(int codigo, const char* novoNome, const char* novaEspecialidade);
 int AtualizarBruxo(Bruxo b);
 int ApagarBruxoPeloCodigo(int codigo);
 

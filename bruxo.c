@@ -132,6 +132,21 @@ int AtualizarBruxo(Bruxo b)
     return 0; // Bruxo com o código especificado não encontrado
 }
 
+int ModificarBruxoPeloCodigo(int codigo, const char* novoNome, const char* novaEspecialidade)
+{
+    Bruxo* bruxoParaAtualizar = ObterBruxoPeloCodigo(codigo);
+
+    if (bruxoParaAtualizar != NULL) {
+        free(bruxoParaAtualizar->nome); // Libera a memória do nome existente
+        free(bruxoParaAtualizar->especialidade); // Libera a memória da especialidade existente
+
+        bruxoParaAtualizar->nome = strdup(novoNome);
+        bruxoParaAtualizar->especialidade = strdup(novaEspecialidade);
+
+        return AtualizarBruxo(*bruxoParaAtualizar);
+    }
+    return 0; // Bruxo com o código especificado não encontrado
+}
 
 int ApagarBruxoPeloCodigo(int codigo)
 {

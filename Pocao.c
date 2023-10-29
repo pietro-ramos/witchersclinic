@@ -131,6 +131,22 @@ int AtualizarPocao(Pocao p)
     return 0; // Poção com o código especificado não encontrado
 }
 
+int ModificarPocaoPeloCodigo(int codigo, const char* novoNome, const char* novoTipo)
+{
+    Pocao* pocaoParaAtualizar = ObterPocaoPeloCodigo(codigo);
+
+    if (pocaoParaAtualizar != NULL) {
+        free(pocaoParaAtualizar->nome); // Libera a memória do nome existente
+        free(pocaoParaAtualizar->tipo); // Libera a memória do tipo existente
+
+        pocaoParaAtualizar->nome = strdup(novoNome);
+        pocaoParaAtualizar->tipo = strdup(novoTipo);
+
+        return AtualizarPocao(*pocaoParaAtualizar);
+    }
+    return 0; // Poção com o código especificado não encontrada
+}
+
 int ApagarPocaoPeloCodigo(int codigo)
 {
     int indiceParaRemover = -1;

@@ -6,7 +6,8 @@
 #include "Bruxo.h"
 #include "Pocao.h"
 #include "Paciente.h"
-	
+#include "Tratamento.h"
+
 int codigo;
 int indice;
 int resultadoCadastro;
@@ -15,7 +16,15 @@ char* especialidade;
 char* tipo;
 int idade;
 float altura;
+char* descricao;
+int duracao;
 Bruxo novoBruxo;
+Pocao novaPocao;
+Paciente novoPaciente;
+Tratamento novoTratamento;
+int codigoTratamento;
+int codPaciente;
+int codBruxo;
 void InicializarTudo();
 void EncerrarTudo();
 void menuBruxo();
@@ -74,6 +83,7 @@ void InicializarTudo()
 	InicializarBruxos();
 	InicializarPocoes();
 	InicializarPacientes();
+	InicializarTratamentos();
 }
 
 void EncerrarTudo()
@@ -81,6 +91,7 @@ void EncerrarTudo()
 	EncerrarBruxos();
 	EncerrarPocoes();
 	EncerrarPacientes();
+	EncerrarTratamentos();
 }
 
 // FUNÇÕES DOS SUBMENUS
@@ -162,29 +173,22 @@ void menuBruxo()
                     printf("Código já existente. Por favor, insira um código diferente.\n");
                 }
                 break;
-            case 3:
+            case 3: // Alterar bruxo
 			    codigo = get_int_input("Digite o código do Bruxo que deseja atualizar: ");
-			    Bruxo* bruxoParaAtualizar = ObterBruxoPeloCodigo(codigo);
+			    char* novoNome;
+			    novoNome = get_string_input("Digite o novo nome do Bruxo: ");
+			    char* novaEspecialidade;
+				novaEspecialidade = get_string_input("Digite a nova especialidade do Bruxo: ");
+				
+			    Bruxo novoBruxo;
+			    novoBruxo.codigo = codigo;
+			    novoBruxo.nome = novoNome;
+			    novoBruxo.especialidade = novaEspecialidade;
 			
-			    if (bruxoParaAtualizar != NULL)
-				{
-					char* novoNome;
-			        novoNome = get_string_input("Digite o novo nome do Bruxo: ");
-			        char* novaEspecialidade;
-			        novaEspecialidade = get_string_input("Digite a nova especialidade do Bruxo: ");
-			        Bruxo novoBruxo;
-			   		novoBruxo.codigo = codigo;
-                	novoBruxo.nome = novoNome;
-               		novoBruxo.especialidade = novaEspecialidade;
-               		
-			        if (AtualizarBruxo(novoBruxo))
-					{
-			            printf("Bruxo atualizado com sucesso!\n");
-			        } else {
-			            printf("Falha ao atualizar o Bruxo.\n");
-			        }
+			    if (ModificarBruxoPeloCodigo(codigo, novoNome, novaEspecialidade)) {
+			        printf("Bruxo atualizado com sucesso!\n");
 			    } else {
-			        printf("Bruxo não encontrado.\n");
+			        printf("Falha ao atualizar o Bruxo ou Bruxo não encontrado.\n");
 			    }
 			    break;
 
@@ -286,32 +290,19 @@ void menuPaciente()
                     printf("Código já existente. Por favor, insira um código diferente.\n");
                 }
                 break;
-            case 3:
-                codigo = get_int_input("Digite o código do Paciente que deseja atualizar: ");
-                Paciente* pacienteParaAtualizar = ObterPacientePeloCodigo(codigo);
-
-                if (pacienteParaAtualizar != NULL)
-                {
-                    char* novoNome;
-                    novoNome = get_string_input("Digite o novo nome do Paciente: ");
-                    int novaIdade = get_int_input("Digite a nova idade do Paciente: ");
-                    float novaAltura = get_float_input("Digite a nova altura do Paciente: ");
-                    Paciente novoPaciente;
-                    novoPaciente.codigo = codigo;
-                    novoPaciente.nome = novoNome;
-                    novoPaciente.idade = novaIdade;
-                    novoPaciente.altura = novaAltura;
-
-                    if (AtualizarPaciente(novoPaciente))
-                    {
-                        printf("Paciente atualizado com sucesso!\n");
-                    } else {
-                        printf("Falha ao atualizar o Paciente.\n");
-                    }
-                } else {
-                    printf("Paciente não encontrado.\n");
-                }
-                break;
+            case 3: // Alterar paciente
+			    codigo = get_int_input("Digite o código do Paciente que deseja atualizar: ");
+			    char* novoNome;
+			    novoNome = get_string_input("Digite o novo nome do Paciente: ");
+			    int novaIdade = get_int_input("Digite a nova idade do Paciente: ");
+			    float novaAltura = get_float_input("Digite a nova altura do Paciente: ");
+			    
+			    if (ModificarPacientePeloCodigo(codigo, novoNome, novaIdade, novaAltura)) {
+			        printf("Paciente atualizado com sucesso!\n");
+			    } else {
+			        printf("Falha ao atualizar o Paciente ou Paciente não encontrado.\n");
+			    }
+			    break;
             case 4: // Excluir paciente
                 codigo = get_int_input("Digite o código do Paciente que deseja apagar: ");
 
@@ -407,31 +398,19 @@ void menuPocao()
                     printf("Código já existente. Por favor, insira um código diferente.\n");
                 }
                 break;
-            case 3:
-                codigo = get_int_input("Digite o código da Poção que deseja atualizar: ");
-                Pocao* pocaoParaAtualizar = ObterPocaoPeloCodigo(codigo);
-
-                if (pocaoParaAtualizar != NULL)
-                {
-                    char* novoNome;
-                    novoNome = get_string_input("Digite o novo nome da Poção: ");
-                    char* novoTipo;
-                    novoTipo = get_string_input("Digite o novo tipo da Poção: ");
-                    Pocao novaPocao;
-                    novaPocao.codigo = codigo;
-                    novaPocao.nome = novoNome;
-                    novaPocao.tipo = novoTipo;
-
-                    if (AtualizarPocao(novaPocao))
-                    {
-                        printf("Poção atualizada com sucesso!\n");
-                    } else {
-                        printf("Falha ao atualizar a Poção.\n");
-                    }
-                } else {
-                    printf("Poção não encontrada.\n");
-                }
-                break;
+            case 3: // Alterar poção
+			    codigo = get_int_input("Digite o código da Poção que deseja atualizar: ");
+			    char* novoNome;
+			    novoNome = get_string_input("Digite o novo nome da Poção: ");
+			    char* novoTipo;
+			    novoTipo = get_string_input("Digite o novo tipo da Poção: ");
+			    
+			    if (ModificarPocaoPeloCodigo(codigo, novoNome, novoTipo)) {
+			        printf("Poção atualizada com sucesso!\n");
+			    } else {
+			        printf("Falha ao atualizar a Poção ou Poção não encontrada.\n");
+			    }
+			    break;
             case 4: // Excluir poção
                 codigo = get_int_input("Digite o código da Poção que deseja apagar: ");
 
@@ -468,15 +447,62 @@ void menuTratamento()
             case 0:
                 // Retorna ao menu anterior
                 break;
-            case 1:
-                // Listar tratamentos do paciente
-                break;
-            case 2:
-                // Listar tratamentos do bruxo
-                break;
+			case 1:
+			    codigo = get_int_input("Digite o código do Paciente para listar os tratamentos: ");
+			    int* tratamentosPaciente = NULL;
+				int totalTratamentosPaciente = ListarTratamentosPaciente(codigo, &tratamentosPaciente);			    if (totalTratamentosPaciente > 0)
+				{
+			        printf("Tratamentos do Paciente %d:\n", codigo);
+			        for (int i = 0; i < totalTratamentosPaciente; i++)
+					{
+			            int index = tratamentosPaciente[i];
+			            printf("Código do Tratamento: %d\n", tratamentos[index].codigoTratamento);
+			            printf("Código do Paciente: %d\n", tratamentos[index].codigoPaciente);
+			            printf("Código do Bruxo: %d\n", tratamentos[index].codigoBruxo);
+			            printf("Descrição: %s\n", tratamentos[index].descricao);
+			            printf("Duração: %d dias\n\n", tratamentos[index].duracao);
+			        }
+			    } else {
+			        printf("Nenhum tratamento encontrado para o Paciente %d.\n", codigo);
+			    }
+			    free(tratamentosPaciente);
+				tratamentosPaciente = NULL;
+			    break;
+			case 2:
+			    codigo = get_int_input("Digite o código do Bruxo para listar os tratamentos: ");
+				int* tratamentosBruxo = NULL;
+				int totalTratamentosBruxo = ListarTratamentosBruxo(codigo, &tratamentosBruxo);
+			    if (totalTratamentosBruxo > 0) {
+			        printf("Tratamentos do Bruxo %d:\n", codigo);
+			        for (int i = 0; i < totalTratamentosBruxo; i++)
+					{
+			            int index = tratamentosBruxo[i];
+			            printf("Código do Tratamento: %d\n", tratamentos[index].codigoTratamento);
+			            printf("Código do Paciente: %d\n", tratamentos[index].codigoPaciente);
+			            printf("Código do Bruxo: %d\n", tratamentos[index].codigoBruxo);
+			            printf("Descrição: %s\n", tratamentos[index].descricao);
+			            printf("Duração: %d dias\n\n", tratamentos[index].duracao);
+			        }
+			    } else {
+			        printf("Nenhum tratamento encontrado para o Bruxo %d.\n", codigo);
+			    }
+			    free(tratamentosBruxo);
+				tratamentosBruxo = NULL;
+			    break;
             case 3:
-                // Iniciar tratamento
+                codigoTratamento = get_int_input("Digite o código do tratamento: ");
+                codPaciente = get_int_input("Digite o código do paciente: ");
+                codBruxo = get_int_input("Digite o código do bruxo: ");
+                descricao = get_string_input("Digite a descrição: ");
+                duracao = get_int_input("Digite a duração do tratamento: ");
+
+                if (IniciarTratamento(codigoTratamento, codPaciente, codBruxo, descricao, duracao)) {
+                    printf("Tratamento iniciado com sucesso!\n");
+                } else {
+                    printf("Falha ao iniciar o tratamento.\n");
+                }
                 break;
+
             case 4:
                 // Ampliar tratamento
                 break;

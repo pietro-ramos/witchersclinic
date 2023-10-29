@@ -16,6 +16,7 @@ Pocao* ObterPocaoPeloIndice(int indice);
 void LiberarCopiaPocao(Pocao* copiaPocao);
 Pocao* ObterPocaoPeloCodigo(int codigo);
 int AtualizarPocao(Pocao p);
+int ModificarPocaoPeloCodigo(int codigo, const char* novoNome, const char* novoTipo);
 int ApagarPocaoPeloCodigo(int codigo);
 
 #endif

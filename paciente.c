@@ -130,6 +130,22 @@ int AtualizarPaciente(Paciente p)
     return 0; // Paciente com o código especificado não encontrado
 }
 
+int ModificarPacientePeloCodigo(int codigo, const char* novoNome, int novaIdade, float novaAltura)
+{
+    Paciente* pacienteParaAtualizar = ObterPacientePeloCodigo(codigo);
+
+    if (pacienteParaAtualizar != NULL) {
+        free(pacienteParaAtualizar->nome); // Libera a memória do nome existente
+        pacienteParaAtualizar->nome = strdup(novoNome);
+        pacienteParaAtualizar->idade = novaIdade;
+        pacienteParaAtualizar->altura = novaAltura;
+
+        return AtualizarPaciente(*pacienteParaAtualizar);
+    }
+    return 0; // Paciente com o código especificado não encontrado
+}
+
+
 int ApagarPacientePeloCodigo(int codigo)
 {
     int indiceParaRemover = -1;
