@@ -1,6 +1,6 @@
 [Project]
-FileName=ProjetoAlg.dev
-Name=ProjetoAlg
+FileName=Projeto.dev
+Name=Projeto
 Type=1
 Ver=2
 ObjFiles=
@@ -28,8 +28,8 @@ Folders=
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
-CompilerSettings=00000000a0000000000000000
-UnitCount=11
+CompilerSettings=0000000000000000001000000
+UnitCount=9
 
 [VersionInfo]
 Major=1
@@ -39,26 +39,16 @@ Build=0
 LanguageID=1033
 CharsetID=1252
 CompanyName=
-FileVersion=
+FileVersion=1.0.0.0
 FileDescription=Developed using the Dev-C++ IDE
 InternalName=
 LegalCopyright=
 LegalTrademarks=
 OriginalFilename=
 ProductName=
-ProductVersion=
+ProductVersion=1.0.0.0
 AutoIncBuildNr=0
 SyncProduct=1
-
-[Unit2]
-FileName=get_input.c
-CompileCpp=0
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
 
 [Unit1]
 FileName=main.c
@@ -70,8 +60,18 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
+[Unit2]
+FileName=Bruxo.h
+CompileCpp=0
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
 [Unit3]
-FileName=get_input.h
+FileName=Bruxo.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -81,7 +81,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit4]
-FileName=bruxo.c
+FileName=Pocao.h
 CompileCpp=0
 Folder=
 Compile=1
@@ -91,7 +91,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit5]
-FileName=bruxo.h
+FileName=Pocao.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -101,7 +101,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit6]
-FileName=pocoes.h
+FileName=Paciente.h
 CompileCpp=0
 Folder=
 Compile=1
@@ -111,7 +111,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit7]
-FileName=pocoes.c
+FileName=Paciente.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -121,7 +121,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit8]
-FileName=tratamento.h
+FileName=get_input.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -131,27 +131,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit9]
-FileName=tratamento.c
-CompileCpp=0
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit10]
-FileName=paciente.h
-CompileCpp=0
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit11]
-FileName=paciente.c
+FileName=get_input.h
 CompileCpp=0
 Folder=
 Compile=1

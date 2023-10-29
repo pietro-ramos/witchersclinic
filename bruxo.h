@@ -2,16 +2,22 @@
 #define BRUXO_H
 
 
-#define MAX_BRUXOS 100
-#define MAX_NOME 50
-#define MAX_ESPECIALIDADE 50
-#define MAX_POCOES 100
-#define MAX_PACIENTES 100
-#define MAX_TRATAMENTOS 100
+typedef struct {
+    int codigo;
+    char* nome;
+    char* especialidade;
+} Bruxo;
 
-void listarBruxos(char** nomesBruxos, char** especialidadeBruxos, int numBruxos);
-void cadastrarBruxo(char** nomesBruxos[MAX_BRUXOS], char** especialidadeBruxos, int* numBruxos);
-void excluirBruxo(char** nomesBruxos, int* numBruxos);
-void listarPacientesDoBruxo(char** nomesBruxos, int numBruxos, char** nomesPacientes);
+int InicializarBruxos();
+int EncerrarBruxos();
+int VerificarCodigoBruxo(int codigo);
+int SalvarBruxo(Bruxo b);
+int QuantidadeBruxos();
+Bruxo* ObterBruxoPeloIndice(int indice);
+void LiberarCopiaBruxo(Bruxo* copiaBruxo);
+Bruxo* ObterBruxoPeloCodigo(int codigo);
+int AtualizarBruxo(Bruxo b);
+int ApagarBruxoPeloCodigo(int codigo);
 
 #endif
+

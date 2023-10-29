@@ -4,9 +4,18 @@
 
 float get_float_input(char* prompt) {
     float input;
-    printf("%s", prompt);
-    scanf("%f", &input);
-    return input;
+    char c;
+    
+    while (1) {
+    	printf("%s", prompt);
+    	if (scanf("%f", &input) == 1) {
+    		while ((c = getchar()) != '\n' && c != EOF);
+    		return input;
+		} else {
+			printf("Entrada invalida. Tente novamente.\n");
+			while ((c = getchar()) != '\n' && c != EOF);
+		}
+	}
 }
 
 int get_int_input(char* prompt) {

@@ -1,118 +1,174 @@
+#include "Bruxo.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "get_input.h"
-#include "bruxo.h"
+#include <string.h>
 
+Bruxo* bruxos = NULL;
+int MAX_BRUXOS = 5;
+int qtdBruxos = 0;
 
-#define MAX_BRUXOS 100
-#define MAX_NOME 50
-#define MAX_ESPECIALIDADE 50
-#define MAX_POCOES 100
-#define MAX_PACIENTES 100
-#define MAX_TRATAMENTOS 100
-
-void limparIndices(char** nomesBruxos, char** especialidadeBruxos, char** nomesPocoes, char** nomesPacientes, char** nomesTratamentos, int numBruxos, int numPocoes, int numPacientes, int numTratamentos) {
-    for (int i = 0; i < numBruxos; i++) {
-        nomesBruxos[i][0] = '\0';
-        especialidadeBruxos[i][0] = '\0';
+int InicializarBruxos()
+{
+    bruxos = (Bruxo*)malloc(MAX_BRUXOS * sizeof(Bruxo));
+    if (bruxos == NULL)
+	{
+        return 0;
     }
-
-    for (int i = 0; i < numPocoes; i++) {
-        nomesPocoes[i][0] = '\0';
-    }
-
-    for (int i = 0; i < numPacientes; i++) {
-        nomesPacientes[i][0] = '\0';
-    }
-
-    for (int i = 0; i < numTratamentos; i++) {
-        nomesTratamentos[i][0] = '\0';
-    }
+    return 1;
 }
 
-
-void listarBruxos(char** nomesBruxos, char** especialidadeBruxos, int numBruxos) {
-    printf("=== Lista de Bruxos ===\n");
-    if(numBruxos > 0) {
-	    printf("=== Lista de Bruxos ===\n");
-	    for (int i = 0; i < MAX_BRUXOS; i++) {
-	    	printf("Código do bruxo: %d\n", i);
-	        printf("Nome: %s\n", nomesBruxos[i]);
-	        printf("Especialidade: %s\n", especialidadeBruxos[i]);
-	        printf("----------------------\n");
-	    }
-	}
-	else {
-		printf("Nenhum bruxo cadastrado!");
-	}
-}
-
-void cadastrarBruxo(char** nomesBruxos[MAX_BRUXOS], char** especialidadeBruxos, int* numBruxos) {
-    if (*numBruxos < MAX_BRUXOS) {
-    	int codigo;
-    	char* nome;
-    	char* especialidade;
-    	do {
-    		printf("(0 a %d)", MAX_BRUXOS - 1);
-	        codigo = get_int_input("Índice para cadastro: ");
-	        if (codigo < 0 || codigo >= MAX_BRUXOS) {
-	            printf("Índice inválido, tente novamente.\n");
-	        } else if (nomesBruxos[codigo][0] != '\0') {
-	            printf("O índice escolhido já está ocupado. O bruxo não pode ser cadastrado.\n");
-	        }
-    	} while (nomesBruxos[codigo][0] != '\0');
-        *nome = get_string_input("Digite o nome do bruxo: ");
-        nomesBruxos[codigo] = nome;
-        *especialidade = get_string_input("Digite a especialidade do bruxo: ");
-        especialidadeBruxos[codigo] = especialidade;
-        (*numBruxos)++;
-        printf("Bruxo cadastrado com sucesso!\n");
-	} else {
-        printf("Limite de bruxos atingido!\n");
+int EncerrarBruxos()
+{
+    if (bruxos != NULL)
+	{
+        free(bruxos);
+        bruxos = NULL;
+        MAX_BRUXOS = 0;
+        qtdBruxos = 0;
+        return 1;
     }
+    return 0;
 }
 
-void excluirBruxo(char** nomesBruxos, int* numBruxos) {
-    if (*numBruxos > 0) {
-        int codigo = get_int_input("Digite o código do bruxo a ser excluído: ");
-        if (codigo >= 0 && codigo < *numBruxos) {
-        	if (nomesBruxos[codigo][0] != '\0') {
-            // Verificar se o bruxo possui tratamentos relacionados antes de excluí-lo
-            // ...
-
-            free(nomesBruxos[codigo]);
-            for (int i = codigo; i < *numBruxos - 1; i++) {
-                nomesBruxos[i] = nomesBruxos[i + 1];
-            }
-        } else {
-        	printf("Bruxo não cadastrado no código fornecido.\n");
-		}
-            (*numBruxos)--;
-            printf("Bruxo excluído com sucesso!\n");
-        } else {
-            printf("Código de bruxo inválido!\n");
+int VerificarCodigoBruxo(int codigo)
+{
+    for (int i = 0; i < qtdBruxos; i++)
+	{
+        if (bruxos[i].codigo == codigo)
+		{
+            return 1; // Código já existe na lista de bruxos
         }
-    } else {
-        printf("Não há bruxos cadastrados!\n");
+    }
+    return 0; // Código não encontrado na lista de bruxos
+}
+
+int SalvarBruxo(Bruxo b)
+{
+    if (bruxos == NULL)
+	{
+        return 0;
+    }
+    
+    if (VerificarCodigoBruxo(b.codigo))
+	{
+    	return 0; 
+	}
+
+    if (qtdBruxos == MAX_BRUXOS)
+	{
+        // Amplia o array usando realloc
+        MAX_BRUXOS += 5;
+        Bruxo* temp = (Bruxo*)realloc(bruxos, MAX_BRUXOS * sizeof(Bruxo));
+        if (temp == NULL)
+		{
+            return 0; // Não foi possível ampliar o array
+        }
+        bruxos = temp;
+    }
+
+    bruxos[qtdBruxos] = b;
+    qtdBruxos++;
+    return 1;
+}
+
+int QuantidadeBruxos()
+{
+    return qtdBruxos;
+}
+
+Bruxo* ObterBruxoPeloIndice(int indice)
+{
+    if (indice >= 0 && indice < qtdBruxos) {
+        Bruxo* copiaBruxo = (Bruxo*)malloc(sizeof(Bruxo));
+
+        if (copiaBruxo == NULL) {
+            return NULL;
+        }
+        
+        copiaBruxo->codigo = bruxos[indice].codigo;
+        copiaBruxo->nome = strdup(bruxos[indice].nome);
+        copiaBruxo->especialidade = strdup(bruxos[indice].especialidade);
+
+        return copiaBruxo;
+    }
+    return NULL;
+}
+
+void LiberarCopiaBruxo(Bruxo* copiaBruxo)
+{
+    if (copiaBruxo != NULL) {
+        free(copiaBruxo->nome);
+        free(copiaBruxo->especialidade);
+        free(copiaBruxo);
     }
 }
 
-void listarPacientesDoBruxo(char** nomesBruxos, int numBruxos, char** nomesPacientes) {
-    if (numBruxos > 0) {
-        int codigoBruxo = get_int_input("Digite o código do bruxo: ");
-        if (codigoBruxo >= 0 && codigoBruxo < numBruxos) {
-            printf("=== Pacientes do Bruxo ===\n");
-            // Percorrer a lista de pacientes e exibir apenas os que pertencem ao bruxo selecionado
-            for (int i = 0; i < MAX_PACIENTES; i++) {
-                if (nomesPacientes[i] != NULL && nomesPacientes[i][1] == codigoBruxo) {
-                    printf("%d. %s\n", i, nomesPacientes[i]);
-                }
-            }
-        } else {
-            printf("Código de bruxo inválido!\n");
+
+Bruxo* ObterBruxoPeloCodigo(int codigo)
+{
+    for (int i = 0; i < qtdBruxos; i++)
+	{
+        if (bruxos[i].codigo == codigo)
+		{
+            return &bruxos[i];
         }
-    } else {
-        printf("Não há bruxos cadastrados!\n");
     }
+    return NULL;
+}
+
+int AtualizarBruxo(Bruxo b)
+{
+    Bruxo* bruxoExistente = ObterBruxoPeloCodigo(b.codigo);
+
+    if (bruxoExistente != NULL) {
+        free(bruxoExistente->nome); // Libera a memória do nome existente
+        free(bruxoExistente->especialidade); // Libera a memória da especialidade existente
+
+        bruxoExistente->nome = strdup(b.nome);
+        bruxoExistente->especialidade = strdup(b.especialidade);
+
+        return 1;
+    }
+    return 0; // Bruxo com o código especificado não encontrado
+}
+
+
+int ApagarBruxoPeloCodigo(int codigo)
+{
+    int indiceParaRemover = -1;
+    for (int i = 0; i < qtdBruxos; i++)
+	{
+        if (bruxos[i].codigo == codigo)
+		{
+            indiceParaRemover = i;
+            break;
+        }
+    }
+
+    if (indiceParaRemover != -1)
+	{
+        free(bruxos[indiceParaRemover].nome);
+        free(bruxos[indiceParaRemover].especialidade);
+
+        // Movendo os bruxos à direita do índice para preencher a lacuna
+        for (int i = indiceParaRemover; i < qtdBruxos - 1; i++)
+		{
+            bruxos[i] = bruxos[i + 1];
+        }
+
+        qtdBruxos--;
+
+        // Verificar a ocupação e reduzir o array se necessário
+        if (qtdBruxos < MAX_BRUXOS / 2.5)
+		{
+            MAX_BRUXOS /= 2.5;
+            Bruxo* temp = (Bruxo*)realloc(bruxos, MAX_BRUXOS * sizeof(Bruxo));
+            if (temp != NULL) {
+                bruxos = temp;
+            }
+        }
+        return 1;
+    }
+    return 0; // Bruxo com o código especificado não encontrado
 }
 
