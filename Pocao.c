@@ -1,4 +1,5 @@
 #include "Pocao.h"
+#include "Tratamento.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +10,7 @@ int qtdPocoes = 0;
 
 int InicializarPocoes()
 {
-    pocoes = (Pocao*)malloc(MAX_POCOES * sizeof(Pocao));
+    pocoes = (Pocao*)calloc(MAX_POCOES, sizeof(Pocao));
     if (pocoes == NULL)
     {
         return 0;
@@ -21,6 +22,11 @@ int EncerrarPocoes()
 {
     if (pocoes != NULL)
     {
+    	for(int i = 0; i < qtdPocoes; i++)
+    	{
+    		free(pocoes[i].nome);
+    		free(pocoes[i].tipo);
+		}
         free(pocoes);
         pocoes = NULL;
         MAX_POCOES = 0;
@@ -161,6 +167,11 @@ int ApagarPocaoPeloCodigo(int codigo)
 
     if (indiceParaRemover != -1)
     {
+    	if (VerificarTratamentosVinculadosAPocao(codigo))
+		{
+			printf("Não é possível excluir a pocao, pois ha tratamentos vinculados.\n");
+		    return 0;
+		}
         free(pocoes[indiceParaRemover].nome);
         free(pocoes[indiceParaRemover].tipo);
 
@@ -175,11 +186,14 @@ int ApagarPocaoPeloCodigo(int codigo)
         // Verificar a ocupação e reduzir o array se necessário
         if (qtdPocoes < MAX_POCOES / 2.5)
         {
+        	int temp_MAX_POCOES = MAX_POCOES;
             MAX_POCOES /= 2.5;
             Pocao* temp = (Pocao*)realloc(pocoes, MAX_POCOES * sizeof(Pocao));
             if (temp != NULL) {
                 pocoes = temp;
-            }
+            } else {
+            	MAX_POCOES = temp_MAX_POCOES;
+			}
         }
         return 1;
     }

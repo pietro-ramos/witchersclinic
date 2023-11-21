@@ -16,7 +16,7 @@ char* especialidade;
 char* tipo;
 int idade;
 float altura;
-char* descricao;
+int dosagem;
 int duracao;
 Bruxo novoBruxo;
 Pocao novaPocao;
@@ -25,7 +25,8 @@ Tratamento novoTratamento;
 int codigoTratamento;
 int codPaciente;
 int codBruxo;
-void InicializarTudo();
+int codPocao;
+int InicializarTudo();
 void EncerrarTudo();
 void menuBruxo();
 void menuPaciente();
@@ -35,7 +36,16 @@ void menuTratamento();
 
 int main(int argc, char *argv[]) {
 	setlocale(LC_ALL, "Portuguese");
-    InicializarTudo(); // Inicializa as estruturas
+    int resultado = InicializarTudo();
+
+    if (resultado == 0)
+	{
+        printf("Falha na inicializacao de pelo menos uma entidade. Encerrando programa.\n"); // Encerra o programa
+		return 0;
+    } else {
+        printf("Todas as entidades foram inicializadas com sucesso.\n"); // Continua o programa
+    }
+    
 	int opcao = -1;
 	
     while (opcao != 0) {
@@ -78,12 +88,14 @@ int main(int argc, char *argv[]) {
 
 // INICIALIZAÇÃO E ENCERRAMENTO
 
-void InicializarTudo()
+int InicializarTudo()
 {
-	InicializarBruxos();
-	InicializarPocoes();
-	InicializarPacientes();
-	InicializarTratamentos();
+    if (!InicializarBruxos() || !InicializarPocoes() || !InicializarPacientes() || !InicializarTratamentos())
+	{
+        return 0; // Retorna 0 se qualquer inicializacao falhar
+    }
+
+    return 1; // Retorna 1 se todas as inicializacoes forem bem-sucedidas
 }
 
 void EncerrarTudo()
@@ -158,6 +170,7 @@ void menuBruxo()
 		                }
 		                break;
 		    	}
+		    	break;
                 /////////////////////////////////////////////////////////////////////////////////
             case 2: // Cadastrar bruxo
     			codigo = get_int_input("Digite o codigo do Bruxo: ");
@@ -184,7 +197,9 @@ void menuBruxo()
 			    novoBruxo.codigo = codigo;
 			    novoBruxo.nome = novoNome;
 			    novoBruxo.especialidade = novaEspecialidade;
-			
+				
+				free(novoNome);
+				free(novaEspecialidade);
 			    if (ModificarBruxoPeloCodigo(codigo, novoNome, novaEspecialidade)) {
 			        printf("Bruxo atualizado com sucesso!\n");
 			    } else {
@@ -294,8 +309,10 @@ void menuPaciente()
 			    codigo = get_int_input("Digite o código do Paciente que deseja atualizar: ");
 			    char* novoNome;
 			    novoNome = get_string_input("Digite o novo nome do Paciente: ");
-			    int novaIdade = get_int_input("Digite a nova idade do Paciente: ");
-			    float novaAltura = get_float_input("Digite a nova altura do Paciente: ");
+			    int novaIdade = 0;
+			    novaIdade = get_int_input("Digite a nova idade do Paciente: ");
+			    float novaAltura = 0.0;
+			    novaAltura = get_float_input("Digite a nova altura do Paciente: ");
 			    
 			    if (ModificarPacientePeloCodigo(codigo, novoNome, novaIdade, novaAltura)) {
 			        printf("Paciente atualizado com sucesso!\n");
@@ -428,7 +445,6 @@ void menuPocao()
     }
 }
 
-
 void menuTratamento()
 {
     int opcao = -1;
@@ -443,85 +459,166 @@ void menuTratamento()
 
 		opcao = get_int_input("");
 
-        switch (opcao) {
+        switch (opcao)
+		{
             case 0:
                 // Retorna ao menu anterior
                 break;
 			case 1:
 			    codigo = get_int_input("Digite o código do Paciente para listar os tratamentos: ");
 			    int* tratamentosPaciente = NULL;
-				int totalTratamentosPaciente = ListarTratamentosPaciente(codigo, &tratamentosPaciente);			    if (totalTratamentosPaciente > 0)
+				int totalTratamentosPaciente = ListarTratamentosPaciente(codigo, &tratamentosPaciente);
+				if(totalTratamentosPaciente > 0)
 				{
 			        printf("Tratamentos do Paciente %d:\n", codigo);
 			        for (int i = 0; i < totalTratamentosPaciente; i++)
 					{
-			            int index = tratamentosPaciente[i];
-			            printf("Código do Tratamento: %d\n", tratamentos[index].codigoTratamento);
-			            printf("Código do Paciente: %d\n", tratamentos[index].codigoPaciente);
-			            printf("Código do Bruxo: %d\n", tratamentos[index].codigoBruxo);
-			            printf("Descrição: %s\n", tratamentos[index].descricao);
-			            printf("Duração: %d dias\n\n", tratamentos[index].duracao);
+			             Tratamento* tratamento = ObterTratamentoPeloIndice(tratamentosPaciente[i]);
+			             if (tratamento != NULL)
+			             {
+			             	printf("Codigo do Tratamento: %d\n", tratamento->codigoTratamento);
+                            printf("Codigo do Paciente: %d\n", tratamento->codigoPaciente);
+							if (ObterNomePaciente(tratamento->codigoPaciente, nome))
+							{
+							    printf("Nome do Paciente: %s\n", nome);
+							    free(nome);
+							}
+                            printf("Codigo do Bruxo: %d\n", tratamento->codigoBruxo);
+							if (ObterNomeBruxo(tratamento->codigoBruxo, nome))
+							{
+							    printf("Nome do Bruxo: %s\n", nome);
+							    free(nome);
+							}                            
+							printf("Codigo da Pocao: %d\n", tratamento->codigoPocao);
+							if (ObterNomePocao(tratamento->codigoPocao, nome))
+							{
+							    printf("Nome da Pocao: %s\n", nome);
+							    free(nome);
+							}                            
+							printf("Dosagem: %d\n", tratamento->dosagem);
+                            printf("Duracao: %d dias\n\n", tratamento->duracao);
+                            LiberarCopiaTratamento(tratamento);
+                            free(tratamentosPaciente);
+							tratamentosPaciente = NULL;
+						}
 			        }
 			    } else {
 			        printf("Nenhum tratamento encontrado para o Paciente %d.\n", codigo);
 			    }
-			    free(tratamentosPaciente);
-				tratamentosPaciente = NULL;
 			    break;
 			case 2:
 			    codigo = get_int_input("Digite o código do Bruxo para listar os tratamentos: ");
-				int* tratamentosBruxo = NULL;
+			    int* tratamentosBruxo = NULL;
 				int totalTratamentosBruxo = ListarTratamentosBruxo(codigo, &tratamentosBruxo);
-			    if (totalTratamentosBruxo > 0) {
+				if(totalTratamentosBruxo > 0)
+				{
 			        printf("Tratamentos do Bruxo %d:\n", codigo);
 			        for (int i = 0; i < totalTratamentosBruxo; i++)
 					{
-			            int index = tratamentosBruxo[i];
-			            printf("Código do Tratamento: %d\n", tratamentos[index].codigoTratamento);
-			            printf("Código do Paciente: %d\n", tratamentos[index].codigoPaciente);
-			            printf("Código do Bruxo: %d\n", tratamentos[index].codigoBruxo);
-			            printf("Descrição: %s\n", tratamentos[index].descricao);
-			            printf("Duração: %d dias\n\n", tratamentos[index].duracao);
+			             Tratamento* tratamento = ObterTratamentoPeloIndice(tratamentosBruxo[i]);
+			             if (tratamento != NULL)
+			             {
+			             	printf("Codigo do Tratamento: %d\n", tratamento->codigoTratamento);
+                            printf("Codigo do Paciente: %d\n", tratamento->codigoPaciente);
+							if (ObterNomePaciente(tratamento->codigoPaciente, nome))
+							{
+							    printf("Nome do Paciente: %s\n", nome);
+							    free(nome);
+							}
+                            printf("Codigo do Bruxo: %d\n", tratamento->codigoBruxo);
+							if (ObterNomeBruxo(tratamento->codigoBruxo, nome))
+							{
+							    printf("Nome do Bruxo: %s\n", nome);
+							    free(nome);
+							}                            
+							printf("Codigo da Pocao: %d\n", tratamento->codigoPocao);
+							if (ObterNomePocao(tratamento->codigoPocao, nome))
+							{
+							    printf("Nome da Pocao: %s\n", nome);
+							    free(nome);
+							}
+							printf("Dosagem: %d\n", tratamento->dosagem);
+                            printf("Duracao: %d dias\n\n", tratamento->duracao);
+                            LiberarCopiaTratamento(tratamento);
+                            free(tratamentosBruxo);
+							tratamentosBruxo = NULL;		
+						 }
 			        }
 			    } else {
-			        printf("Nenhum tratamento encontrado para o Bruxo %d.\n", codigo);
+			        printf("Nenhum tratamento encontrado para o bruxo %d.\n", codigo);
 			    }
 			    free(tratamentosBruxo);
 				tratamentosBruxo = NULL;
 			    break;
-            case 3:
-                codigoTratamento = get_int_input("Digite o código do tratamento: ");
-                codPaciente = get_int_input("Digite o código do paciente: ");
-                codBruxo = get_int_input("Digite o código do bruxo: ");
-                descricao = get_string_input("Digite a descrição: ");
-                duracao = get_int_input("Digite a duração do tratamento: ");
+			case 3:
+			    {
+			    	int codTratamento = 0;
+			        codTratamento = get_int_input("Digite o codigo do tratamento: ");
+			        int codPaciente = 0;
+			        codPaciente = get_int_input("Digite o codigo do paciente: ");
+			        if (!CodigoPacienteValido(codPaciente))
+					{
+				        printf("Código de paciente inválido. Tratamento não iniciado.\n");
+				        break;
+				    }
+			        int codBruxo = 0;
+			        codBruxo = get_int_input("Digite o codigo do bruxo: ");
+			        if (!CodigoBruxoValido(codBruxo))
+					{
+				        printf("Código de paciente inválido. Tratamento não iniciado.\n");
+				        break;
+				    }
+			        int codPocao = 0;
+			        codPocao = get_int_input("Digite o codigo da pocao: ");
+			        if (!CodigoPocaoValido(codPocao))
+					{
+				        printf("Código de paciente inválido. Tratamento não iniciado.\n");
+				        break;
+				    }
+			        int duracao = 0;
+			        duracao = get_int_input("Digite a duracao do tratamento: ");
+			        int dosagem = 0;
+			        dosagem = get_int_input("Digite a dosagem: ");
+			        
+			        Tratamento novoTratamento;
+			        novoTratamento.codigoTratamento = codTratamento;
+			        novoTratamento.codigoPaciente = codPaciente;
+			        novoTratamento.codigoBruxo = codBruxo;
+			        novoTratamento.codigoPocao = codPocao;
+			        novoTratamento.duracao = duracao;
+			        novoTratamento.dosagem = dosagem;
+			        
+			        if (SalvarTratamento(novoTratamento))
+					{
+			            printf("Tratamento iniciado com sucesso!\n");
+			        } else {
+			            printf("Falha ao iniciar o tratamento.\n");
+			        }
+			    }
+			    break;
+        	case 4:
+                codigo = get_int_input("Digite o código do Tratamento para ampliar: ");
+                int dosagemAdicional = 0;
+                int duracaoAdicional = 0;
+                dosagemAdicional = get_int_input("Digite a dosagem adicional para o tratamento: ");
+				duracaoAdicional = get_int_input("Digite a duração adicional para o tratamento: ");
 
-                if (IniciarTratamento(codigoTratamento, codPaciente, codBruxo, descricao, duracao)) {
-                    printf("Tratamento iniciado com sucesso!\n");
+                if (AmpliarTratamento(codigo, duracaoAdicional, dosagemAdicional))
+				{
+                    printf("Tratamento ampliado com sucesso!\n");
                 } else {
-                    printf("Falha ao iniciar o tratamento.\n");
+                    printf("Falha ao ampliar o tratamento ou tratamento não encontrado.\n");
                 }
                 break;
-			case 4:
-			    codigo = get_int_input("Digite o código do Tratamento para ampliar: ");
-			    int duracaoAdicional = get_int_input("Digite a duração adicional para o tratamento: ");
-			
-			    if (AmpliarTratamento(codigo, duracaoAdicional)) {
-			        printf("Tratamento ampliado com sucesso!\n");
-			    } else {
-			        printf("Falha ao ampliar o tratamento ou tratamento não encontrado.\n");
-			    }
-			    break;
-			
-			case 5:
-			    codigo = get_int_input("Digite o código do Tratamento para excluir: ");
-			
-			    if (ExcluirTratamento(codigo)) {
-			        printf("Tratamento excluído com sucesso!\n");
-			    } else {
-			        printf("Falha ao excluir o tratamento ou tratamento não encontrado.\n");
-			    }
-			    break;
+            case 5:
+            	codigo = get_int_input("Digite o código do Tratamento para apagar: ");
+                if (ExcluirTratamento(codigo))
+				{
+                    printf("Tratamento excluído com sucesso!\n");
+                } else {
+                    printf("Falha ao excluir o tratamento ou tratamento não encontrado.\n");
+                }
+                break;
             default:
                 printf("Opcao invalida. Tente novamente.\n");
                 break;

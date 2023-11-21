@@ -1,4 +1,5 @@
 #include "Paciente.h"
+#include "Tratamento.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +10,7 @@ int qtdPacientes = 0;
 
 int InicializarPacientes()
 {
-    pacientes = (Paciente*)malloc(MAX_PACIENTES * sizeof(Paciente));
+    pacientes = (Paciente*)calloc(MAX_PACIENTES, sizeof(Paciente));
     if (pacientes == NULL)
     {
         return 0;
@@ -21,6 +22,10 @@ int EncerrarPacientes()
 {
     if (pacientes != NULL)
     {
+    	for(int i = 0; i < qtdPacientes; i++)
+    	{
+    		free(pacientes[i].nome);
+		}
         free(pacientes);
         pacientes = NULL;
         MAX_PACIENTES = 0;
@@ -61,6 +66,7 @@ int SalvarPaciente(Paciente p)
         Paciente* temp = (Paciente*)realloc(pacientes, MAX_PACIENTES * sizeof(Paciente));
         if (temp == NULL)
         {
+        	MAX_PACIENTES -= 5;
             return 0; // Não foi possível ampliar o array
         }
         pacientes = temp;
@@ -160,6 +166,11 @@ int ApagarPacientePeloCodigo(int codigo)
 
     if (indiceParaRemover != -1)
     {
+    	if (VerificarTratamentosVinculadosAoPaciente(codigo))
+		{
+			printf("Não é possível excluir o paciente, pois ha tratamentos vinculados.\n");
+		    return 0;
+		}
         free(pacientes[indiceParaRemover].nome);
 
         // Movendo os pacientes à direita do índice para preencher a lacuna
@@ -173,11 +184,14 @@ int ApagarPacientePeloCodigo(int codigo)
         // Verificar a ocupação e reduzir o array se necessário
         if (qtdPacientes < MAX_PACIENTES / 2.5)
         {
+        	int temp_MAX_PACIENTES = MAX_PACIENTES;
             MAX_PACIENTES /= 2.5;
             Paciente* temp = (Paciente*)realloc(pacientes, MAX_PACIENTES * sizeof(Paciente));
             if (temp != NULL) {
                 pacientes = temp;
-            }
+            } else {
+            	MAX_PACIENTES = temp_MAX_PACIENTES;
+			}
         }
         return 1;
     }

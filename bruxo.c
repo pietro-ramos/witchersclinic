@@ -1,4 +1,5 @@
 #include "Bruxo.h"
+#include "Tratamento.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +10,7 @@ int qtdBruxos = 0;
 
 int InicializarBruxos()
 {
-    bruxos = (Bruxo*)malloc(MAX_BRUXOS * sizeof(Bruxo));
+    bruxos = (Bruxo*)calloc(MAX_BRUXOS, sizeof(Bruxo));
     if (bruxos == NULL)
 	{
         return 0;
@@ -21,6 +22,12 @@ int EncerrarBruxos()
 {
     if (bruxos != NULL)
 	{
+		for(int i = 0; i < qtdBruxos;i++)
+		{
+			free(bruxos[i].nome);
+			free(bruxos[i].especialidade);
+		}
+		
         free(bruxos);
         bruxos = NULL;
         MAX_BRUXOS = 0;
@@ -61,6 +68,7 @@ int SalvarBruxo(Bruxo b)
         Bruxo* temp = (Bruxo*)realloc(bruxos, MAX_BRUXOS * sizeof(Bruxo));
         if (temp == NULL)
 		{
+			MAX_BRUXOS -=5;
             return 0; // Não foi possível ampliar o array
         }
         bruxos = temp;
@@ -84,7 +92,7 @@ Bruxo* ObterBruxoPeloIndice(int indice)
         if (copiaBruxo == NULL) {
             return NULL;
         }
-        
+//        *copiaBruxo = bruxos[indice];
         copiaBruxo->codigo = bruxos[indice].codigo;
         copiaBruxo->nome = strdup(bruxos[indice].nome);
         copiaBruxo->especialidade = strdup(bruxos[indice].especialidade);
@@ -162,6 +170,12 @@ int ApagarBruxoPeloCodigo(int codigo)
 
     if (indiceParaRemover != -1)
 	{
+        if (VerificarTratamentosVinculadosAoBruxo(codigo))
+		{
+			printf("Não é possível excluir o bruxo, pois ha tratamentos vinculados.\n");
+		    return 0;
+		}
+		
         free(bruxos[indiceParaRemover].nome);
         free(bruxos[indiceParaRemover].especialidade);
 
@@ -176,11 +190,14 @@ int ApagarBruxoPeloCodigo(int codigo)
         // Verificar a ocupação e reduzir o array se necessário
         if (qtdBruxos < MAX_BRUXOS / 2.5)
 		{
+			int temp_MAX_BRUXOS = MAX_BRUXOS;
             MAX_BRUXOS /= 2.5;
             Bruxo* temp = (Bruxo*)realloc(bruxos, MAX_BRUXOS * sizeof(Bruxo));
             if (temp != NULL) {
                 bruxos = temp;
-            }
+            } else {
+            	MAX_BRUXOS = temp_MAX_BRUXOS;
+			}
         }
         return 1;
     }
