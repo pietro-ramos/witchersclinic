@@ -198,15 +198,14 @@ void menuBruxo()
 			    novoBruxo.nome = novoNome;
 			    novoBruxo.especialidade = novaEspecialidade;
 				
-				free(novoNome);
-				free(novaEspecialidade);
 			    if (ModificarBruxoPeloCodigo(codigo, novoNome, novaEspecialidade)) {
 			        printf("Bruxo atualizado com sucesso!\n");
 			    } else {
 			        printf("Falha ao atualizar o Bruxo ou Bruxo não encontrado.\n");
 			    }
+			    free(novoNome);
+				free(novaEspecialidade);
 			    break;
-
             case 4: // Excluir bruxo
     			codigo = get_int_input("Digite o código do Bruxo que deseja apagar: ");
 
@@ -319,6 +318,7 @@ void menuPaciente()
 			    } else {
 			        printf("Falha ao atualizar o Paciente ou Paciente não encontrado.\n");
 			    }
+			    free(novoNome);
 			    break;
             case 4: // Excluir paciente
                 codigo = get_int_input("Digite o código do Paciente que deseja apagar: ");
@@ -488,23 +488,23 @@ void menuTratamento()
 							{
 							    printf("Nome do Bruxo: %s\n", nome);
 							    free(nome);
-							}                            
+							}
 							printf("Codigo da Pocao: %d\n", tratamento->codigoPocao);
 							if (ObterNomePocao(tratamento->codigoPocao, nome))
 							{
 							    printf("Nome da Pocao: %s\n", nome);
 							    free(nome);
-							}                            
+							}
 							printf("Dosagem: %d\n", tratamento->dosagem);
                             printf("Duracao: %d dias\n\n", tratamento->duracao);
                             LiberarCopiaTratamento(tratamento);
-                            free(tratamentosPaciente);
-							tratamentosPaciente = NULL;
 						}
 			        }
 			    } else {
 			        printf("Nenhum tratamento encontrado para o Paciente %d.\n", codigo);
 			    }
+			    free(tratamentosPaciente);
+				tratamentosPaciente = NULL;
 			    break;
 			case 2:
 			    codigo = get_int_input("Digite o código do Bruxo para listar os tratamentos: ");
@@ -530,7 +530,7 @@ void menuTratamento()
 							{
 							    printf("Nome do Bruxo: %s\n", nome);
 							    free(nome);
-							}                            
+							}
 							printf("Codigo da Pocao: %d\n", tratamento->codigoPocao);
 							if (ObterNomePocao(tratamento->codigoPocao, nome))
 							{
@@ -539,9 +539,7 @@ void menuTratamento()
 							}
 							printf("Dosagem: %d\n", tratamento->dosagem);
                             printf("Duracao: %d dias\n\n", tratamento->duracao);
-                            LiberarCopiaTratamento(tratamento);
-                            free(tratamentosBruxo);
-							tratamentosBruxo = NULL;		
+                            LiberarCopiaTratamento(tratamento);	
 						 }
 			        }
 			    } else {
@@ -558,21 +556,21 @@ void menuTratamento()
 			        codPaciente = get_int_input("Digite o codigo do paciente: ");
 			        if (!CodigoPacienteValido(codPaciente))
 					{
-				        printf("Código de paciente inválido. Tratamento não iniciado.\n");
+				        printf("Codigo de paciente invalido. Tratamento nao iniciado.\n");
 				        break;
 				    }
 			        int codBruxo = 0;
 			        codBruxo = get_int_input("Digite o codigo do bruxo: ");
 			        if (!CodigoBruxoValido(codBruxo))
 					{
-				        printf("Código de paciente inválido. Tratamento não iniciado.\n");
+				        printf("Codigo de bruxo invalido. Tratamento nao iniciado.\n");
 				        break;
 				    }
 			        int codPocao = 0;
 			        codPocao = get_int_input("Digite o codigo da pocao: ");
 			        if (!CodigoPocaoValido(codPocao))
 					{
-				        printf("Código de paciente inválido. Tratamento não iniciado.\n");
+				        printf("Codigo de pocao invalido. Tratamento nao iniciado.\n");
 				        break;
 				    }
 			        int duracao = 0;
@@ -597,7 +595,7 @@ void menuTratamento()
 			    }
 			    break;
         	case 4:
-                codigo = get_int_input("Digite o código do Tratamento para ampliar: ");
+                codigo = get_int_input("Digite o codigo do Tratamento para ampliar: ");
                 int dosagemAdicional = 0;
                 int duracaoAdicional = 0;
                 dosagemAdicional = get_int_input("Digite a dosagem adicional para o tratamento: ");
@@ -607,16 +605,16 @@ void menuTratamento()
 				{
                     printf("Tratamento ampliado com sucesso!\n");
                 } else {
-                    printf("Falha ao ampliar o tratamento ou tratamento não encontrado.\n");
+                    printf("Falha ao ampliar o tratamento ou tratamento nao encontrado.\n");
                 }
                 break;
             case 5:
-            	codigo = get_int_input("Digite o código do Tratamento para apagar: ");
+            	codigo = get_int_input("Digite o codigo do Tratamento para apagar: ");
                 if (ExcluirTratamento(codigo))
 				{
-                    printf("Tratamento excluído com sucesso!\n");
+                    printf("Tratamento excluido com sucesso!\n");
                 } else {
-                    printf("Falha ao excluir o tratamento ou tratamento não encontrado.\n");
+                    printf("Falha ao excluir o tratamento ou tratamento nao encontrado.\n");
                 }
                 break;
             default:

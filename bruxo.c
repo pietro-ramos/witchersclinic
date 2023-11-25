@@ -92,7 +92,6 @@ Bruxo* ObterBruxoPeloIndice(int indice)
         if (copiaBruxo == NULL) {
             return NULL;
         }
-//        *copiaBruxo = bruxos[indice];
         copiaBruxo->codigo = bruxos[indice].codigo;
         copiaBruxo->nome = strdup(bruxos[indice].nome);
         copiaBruxo->especialidade = strdup(bruxos[indice].especialidade);
