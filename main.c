@@ -290,7 +290,7 @@ void menuPaciente()
             case 2: // Cadastrar paciente
                 codigo = get_int_input("Digite o código do Paciente: ");
                 nome = get_string_input("Digite o nome do Paciente: ");
-                idade = get_int_input("Digite a idade do Paciente: ");
+                idade = get_int_input("Digite a idade do Paciente(em x,xx): ");
                 altura = get_float_input("Digite a altura do Paciente: ");
                 Paciente novoPaciente;
                 novoPaciente.codigo = codigo;
@@ -465,6 +465,8 @@ void menuTratamento()
                 // Retorna ao menu anterior
                 break;
 			case 1:
+				{
+				char nome2[100];
 			    codigo = get_int_input("Digite o código do Paciente para listar os tratamentos: ");
 			    int* tratamentosPaciente = NULL;
 				int totalTratamentosPaciente = ListarTratamentosPaciente(codigo, &tratamentosPaciente);
@@ -478,22 +480,19 @@ void menuTratamento()
 			             {
 			             	printf("Codigo do Tratamento: %d\n", tratamento->codigoTratamento);
                             printf("Codigo do Paciente: %d\n", tratamento->codigoPaciente);
-							if (ObterNomePaciente(tratamento->codigoPaciente, nome))
+							if (ObterNomePaciente(tratamento->codigoPaciente, nome2))
 							{
-							    printf("Nome do Paciente: %s\n", nome);
-							    free(nome);
+							    printf("Nome do Paciente: %s\n", nome2);
 							}
                             printf("Codigo do Bruxo: %d\n", tratamento->codigoBruxo);
-							if (ObterNomeBruxo(tratamento->codigoBruxo, nome))
+							if (ObterNomeBruxo(tratamento->codigoBruxo, nome2))
 							{
-							    printf("Nome do Bruxo: %s\n", nome);
-							    free(nome);
+							    printf("Nome do Bruxo: %s\n", nome2);
 							}
 							printf("Codigo da Pocao: %d\n", tratamento->codigoPocao);
-							if (ObterNomePocao(tratamento->codigoPocao, nome))
+							if (ObterNomePocao(tratamento->codigoPocao, nome2))
 							{
-							    printf("Nome da Pocao: %s\n", nome);
-							    free(nome);
+							    printf("Nome da Pocao: %s\n", nome2);
 							}
 							printf("Dosagem: %d\n", tratamento->dosagem);
                             printf("Duracao: %d dias\n\n", tratamento->duracao);
@@ -506,7 +505,10 @@ void menuTratamento()
 			    free(tratamentosPaciente);
 				tratamentosPaciente = NULL;
 			    break;
+				}
 			case 2:
+				{
+				char nome2[100];
 			    codigo = get_int_input("Digite o código do Bruxo para listar os tratamentos: ");
 			    int* tratamentosBruxo = NULL;
 				int totalTratamentosBruxo = ListarTratamentosBruxo(codigo, &tratamentosBruxo);
@@ -520,22 +522,19 @@ void menuTratamento()
 			             {
 			             	printf("Codigo do Tratamento: %d\n", tratamento->codigoTratamento);
                             printf("Codigo do Paciente: %d\n", tratamento->codigoPaciente);
-							if (ObterNomePaciente(tratamento->codigoPaciente, nome))
+							if (ObterNomePaciente(tratamento->codigoPaciente, nome2))
 							{
-							    printf("Nome do Paciente: %s\n", nome);
-							    free(nome);
+							    printf("Nome do Paciente: %s\n", nome2);
 							}
                             printf("Codigo do Bruxo: %d\n", tratamento->codigoBruxo);
-							if (ObterNomeBruxo(tratamento->codigoBruxo, nome))
+							if (ObterNomeBruxo(tratamento->codigoBruxo, nome2))
 							{
-							    printf("Nome do Bruxo: %s\n", nome);
-							    free(nome);
+							    printf("Nome do Bruxo: %s\n", nome2);
 							}
 							printf("Codigo da Pocao: %d\n", tratamento->codigoPocao);
-							if (ObterNomePocao(tratamento->codigoPocao, nome))
+							if (ObterNomePocao(tratamento->codigoPocao, nome2))
 							{
-							    printf("Nome da Pocao: %s\n", nome);
-							    free(nome);
+							    printf("Nome da Pocao: %s\n", nome2);
 							}
 							printf("Dosagem: %d\n", tratamento->dosagem);
                             printf("Duracao: %d dias\n\n", tratamento->duracao);
@@ -548,6 +547,7 @@ void menuTratamento()
 			    free(tratamentosBruxo);
 				tratamentosBruxo = NULL;
 			    break;
+				}
 			case 3:
 			    {
 			    	int codTratamento = 0;

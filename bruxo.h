@@ -8,8 +8,6 @@ typedef struct {
     char* especialidade;
 } Bruxo;
 
-extern Bruxo* bruxos;
-
 int InicializarBruxos();
 int EncerrarBruxos();
 int VerificarCodigoBruxo(int codigo);
