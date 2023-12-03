@@ -1,6 +1,7 @@
 #ifndef BRUXO_H
 #define BRUXO_H
 
+
 typedef struct {
     int codigo;
     char* nome;
