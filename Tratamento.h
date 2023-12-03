@@ -10,8 +10,6 @@ typedef struct {
     int dosagem;
 } Tratamento;
 
-extern Tratamento* tratamentos;
-
 int InicializarTratamentos();
 int EncerrarTratamentos();
 int QuantidadeTratamentos();
