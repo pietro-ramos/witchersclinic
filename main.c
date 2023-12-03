@@ -40,10 +40,9 @@ int main(int argc, char *argv[]) {
 
     if (resultado == 0)
 	{
-        printf("Falha na inicializacao de pelo menos uma entidade. Encerrando programa.\n"); // Encerra o programa
-		return 0;
+        printf("Os arquivos ainda nao existentes foram criados!\n"); // Encerra o programa
     } else {
-        printf("Todas as entidades foram inicializadas com sucesso.\n"); // Continua o programa
+        printf("Todas os arquivos foram inicializadas com sucesso.\n"); // Continua o programa
     }
     
 	int opcao = -1;
@@ -61,6 +60,9 @@ int main(int argc, char *argv[]) {
         switch (opcao) {
             case 0:
                 printf("Saindo do programa...\n");
+                free(nome);
+                free(especialidade);
+                free(tipo);
                 EncerrarTudo(); // Encerra as estruturas
                 break;
             case 1:
@@ -173,18 +175,20 @@ void menuBruxo()
 		    	break;
                 /////////////////////////////////////////////////////////////////////////////////
             case 2: // Cadastrar bruxo
-    			codigo = get_int_input("Digite o codigo do Bruxo: ");
-                nome = get_string_input("Digite o nome do Bruxo: ");
-                especialidade = get_string_input("Digite a especialidade do Bruxo: ");
-                novoBruxo.codigo = codigo;
-                novoBruxo.nome = nome;
-                novoBruxo.especialidade = especialidade;
-                
+				novoBruxo.codigo = get_int_input("Digite o codigo do Bruxo: ");
+				novoBruxo.nome = get_string_input("Digite o nome do Bruxo: ");
+				novoBruxo.especialidade = get_string_input("Digite a especialidade do Bruxo: ");
+				
 				resultadoCadastro = SalvarBruxo(novoBruxo);
-                if (resultadoCadastro == 0)
+				
+				if (resultadoCadastro == 0)
 				{
-                    printf("Código já existente. Por favor, insira um código diferente.\n");
-                }
+				    printf("Código já existente. Por favor, insira um código diferente.\n");
+				}
+				else
+				{
+					printf("Bruxo cadastrado com sucesso!\n");
+				}
                 break;
             case 3: // Alterar bruxo
 			    codigo = get_int_input("Digite o código do Bruxo que deseja atualizar: ");

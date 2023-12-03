@@ -6,15 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-Tratamento* tratamentos = NULL;
-int MAX_TRATAMENTOS = 5;
-int qtdTratamentos = 0;
+FILE* tratamentos = NULL;
 
 int InicializarTratamentos()
 {
-    tratamentos = (Tratamento*)calloc(MAX_TRATAMENTOS, sizeof(Tratamento));
-    if (tratamentos == NULL)
-	{
+    tratamentos = fopen("tratamentos.bin", "rb+");
+    if (!tratamentos)
+    {
+        tratamentos = fopen("tratamentos.bin", "wb+");
         return 0;
     }
     return 1;
@@ -23,182 +22,190 @@ int InicializarTratamentos()
 int EncerrarTratamentos()
 {
     if (tratamentos != NULL)
-	{
-        free(tratamentos);
+    {
+        fclose(tratamentos);
         tratamentos = NULL;
-        MAX_TRATAMENTOS = 0;
-        qtdTratamentos = 0;
         return 1;
     }
     return 0;
 }
 
-int CodigoPacienteValido(int codigo)
+int QuantidadeTratamentos()
 {
-    for (int i = 0; i < QuantidadePacientes(); i++)
-	{
-        if (pacientes[i].codigo == codigo)
-		{
-            return 1;  // Código de paciente válido
+    if (!tratamentos)
+    {
+        return 0;
+    }
+
+    Tratamento countTratamentos;
+    fseek(tratamentos, 0, SEEK_SET); // Move para início do arquivo
+    int quantidade = 0;
+
+    while (fread(&countTratamentos, sizeof(Tratamento), 1, tratamentos) == 1)
+    {
+        quantidade++;
+    }
+
+    return quantidade;
+}
+
+int VerificarCodigoTratamento(int codigo)
+{
+    if (!tratamentos)
+    {
+        return 0;
+    }
+
+    fseek(tratamentos, 0, SEEK_SET);
+
+    Tratamento verificaTratamento;
+    while (fread(&verificaTratamento, sizeof(Tratamento), 1, tratamentos) == 1)
+    {
+        if (verificaTratamento.codigoTratamento == codigo)
+        {
+            return 1; // Código já existe na lista de tratamentos
         }
     }
-    return 0;  // Código de paciente inválido
+
+    return 0; // Código não encontrado na lista de tratamentos
+}
+
+int CodigoPacienteValido(int codigo)
+{
+    return VerificarCodigoPaciente(codigo);
 }
 
 int CodigoBruxoValido(int codigo)
 {
-    for (int i = 0; i < QuantidadeBruxos(); i++)
-	{
-        if (bruxos[i].codigo == codigo)
-		{
-            return 1;  // Código de bruxo válido
-        }
-    }
-    return 0;  // Código de bruxo inválido
+    return VerificarCodigoBruxo(codigo);
 }
 
 int CodigoPocaoValido(int codigo)
 {
-    for (int i = 0; i < QuantidadePocoes(); i++)
-	{
-        if (pocoes[i].codigo == codigo)
-		{
-            return 1;  // Código de bruxo válido
-        }
-    }
-    return 0;  // Código de bruxo inválido
+    return VerificarCodigoPocao(codigo);
 }
 
 int SalvarTratamento(Tratamento t)
 {
-    if (tratamentos == NULL)
-	{
+    if (!tratamentos)
+    {
         return 0;
     }
 
-    if (qtdTratamentos == MAX_TRATAMENTOS)
-	{
-        // Amplia o array usando realloc
-        MAX_TRATAMENTOS += 5;
-        Tratamento* temp = (Tratamento*)realloc(tratamentos, MAX_TRATAMENTOS * sizeof(Tratamento));
-        if (temp == NULL)
-		{
-			MAX_TRATAMENTOS -= 5;
-            return 0; // Não foi possível ampliar o array
-        }
-        tratamentos = temp;
+    if (VerificarCodigoTratamento(t.codigoTratamento))
+    {
+        return 0;
     }
 
-    tratamentos[qtdTratamentos] = t;
-    qtdTratamentos++;
+    fseek(tratamentos, 0, SEEK_END);
+    fwrite(&t, sizeof(Tratamento), 1, tratamentos);
+
     return 1;
 }
 
 Tratamento* ObterTratamentoPeloIndice(int indice)
 {
-    if (indice >= 0 && indice < qtdTratamentos)
-	{
+    if (indice >= 0 && indice < QuantidadeTratamentos())
+    {
         Tratamento* copiaTratamento = (Tratamento*)malloc(sizeof(Tratamento));
+        fseek(tratamentos, indice * sizeof(Tratamento), SEEK_SET);
 
-        if (copiaTratamento == NULL)
-		{
+        if (!copiaTratamento)
+        {
             return NULL;
         }
 
-        *copiaTratamento = tratamentos[indice]; // Copia todos os campos do tratamento
-
+        fread(copiaTratamento, sizeof(Tratamento), 1, tratamentos);
         return copiaTratamento;
     }
     return NULL;
 }
 
-void LiberarCopiaTratamento(Tratamento* copiaTratamento) {
-    if (copiaTratamento != NULL) {
+void LiberarCopiaTratamento(Tratamento* copiaTratamento)
+{
+    if (copiaTratamento != NULL)
+    {
         free(copiaTratamento);
     }
 }
 
-
 Tratamento* ObterTratamentoPeloCodigo(int codigo)
 {
-    for (int i = 0; i < qtdTratamentos; i++)
-	{
-        if (tratamentos[i].codigoTratamento == codigo)
-		{
-            return &tratamentos[i];
+    Tratamento obterTratamento;
+    fseek(tratamentos, 0, SEEK_SET);
+
+    while (fread(&obterTratamento, sizeof(Tratamento), 1, tratamentos) == 1)
+    {
+        if (obterTratamento.codigoTratamento == codigo)
+        {
+            Tratamento* copiaTratamento = (Tratamento*)malloc(sizeof(Tratamento));
+            if (!copiaTratamento)
+            {
+                return NULL;
+            }
+
+            *copiaTratamento = obterTratamento;
+            return copiaTratamento;
         }
     }
+
     return NULL;
-}
-
-int AtualizarTratamento(Tratamento t)
-{
-    Tratamento* tratamentoExistente = ObterTratamentoPeloCodigo(t.codigoTratamento);
-
-    if (tratamentoExistente != NULL)
-	{
-        *tratamentoExistente = t; // Atualiza todos os campos do tratamento
-
-        return 1;
-    }
-    return 0; // Tratamento com o código especificado não encontrado
 }
 
 int ObterNomeBruxo(int codigo, char *nomeBruxo)
 {
-    for (int i = 0; i < QuantidadeBruxos(); i++)
-	{
-        if (bruxos[i].codigo == codigo)
-		{
-            strcpy(nomeBruxo, bruxos[i].nome);
-            return 1;  // Encontrou o bruxo
-        }
+    Bruxo* bruxo = ObterBruxoPeloCodigo(codigo);
+    if (bruxo != NULL)
+    {
+        strcpy(nomeBruxo, bruxo->nome);
+        LiberarCopiaBruxo(bruxo);
+        return 1;
     }
-    return 0;  // Código de bruxo inválido
+    return 0;
 }
 
 int ObterNomePocao(int codigo, char *nomePocao)
 {
-    for (int i = 0; i < QuantidadePocoes(); i++)
-	{
-        if (pocoes[i].codigo == codigo)
-		{
-            strcpy(nomePocao, pocoes[i].nome);
-            return 1;  // Encontrou a poção
-        }
+    Pocao* pocao = ObterPocaoPeloCodigo(codigo);
+    if (pocao != NULL)
+    {
+        strcpy(nomePocao, pocao->nome);
+        LiberarCopiaPocao(pocao);
+        return 1;
     }
-    return 0;  // Código de poção inválido
+    return 0;
 }
 
 int ObterNomePaciente(int codigo, char *nomePaciente)
 {
-    for (int i = 0; i < QuantidadePacientes(); i++)
-	{
-        if (pacientes[i].codigo == codigo)
-		{
-            strcpy(nomePaciente, pacientes[i].nome);
-            return 1;  // Encontrou o paciente
-        }
+    Paciente* paciente = ObterPacientePeloCodigo(codigo);
+    if (paciente != NULL)
+    {
+        strcpy(nomePaciente, paciente->nome);
+        LiberarCopiaPaciente(paciente);
+        return 1;
     }
-    return 0;  // Código de paciente inválido
+    return 0;
 }
-
 
 int ListarTratamentosPaciente(int codigoPaciente, int** tratamentosPaciente)
 {
     int count = 0;
-    *tratamentosPaciente = (int*)malloc(qtdTratamentos * sizeof(int)); // Aloca memória para armazenar os índices dos tratamentos
+    *tratamentosPaciente = (int*)malloc(QuantidadeTratamentos() * sizeof(int));
 
     if (*tratamentosPaciente == NULL)
-	{
-        return 0; // Falha na alocação de memória
+    {
+        return 0;
     }
 
-    for (int i = 0; i < qtdTratamentos; i++)
-	{
-        if (tratamentos[i].codigoPaciente == codigoPaciente)
-		{
-            (*tratamentosPaciente)[count] = i;
+    fseek(tratamentos, 0, SEEK_SET);
+
+    Tratamento tr;
+    while (fread(&tr, sizeof(Tratamento), 1, tratamentos) == 1)
+    {
+        if (tr.codigoPaciente == codigoPaciente)
+        {
+            (*tratamentosPaciente)[count] = tr.codigoTratamento;
             count++;
         }
     }
@@ -209,18 +216,21 @@ int ListarTratamentosPaciente(int codigoPaciente, int** tratamentosPaciente)
 int ListarTratamentosBruxo(int codigoBruxo, int** tratamentosBruxo)
 {
     int count = 0;
-    *tratamentosBruxo = (int*)malloc(qtdTratamentos * sizeof(int)); // Aloca memória para armazenar os índices dos tratamentos
+    *tratamentosBruxo = (int*)malloc(QuantidadeTratamentos() * sizeof(int));
 
     if (*tratamentosBruxo == NULL)
-	{
-        return 0; // Falha na alocação de memória
+    {
+        return 0;
     }
 
-    for (int i = 0; i < qtdTratamentos; i++)
-	{
-        if (tratamentos[i].codigoBruxo == codigoBruxo)
-		{
-            (*tratamentosBruxo)[count] = i;
+    fseek(tratamentos, 0, SEEK_SET);
+
+    Tratamento listadoTratamento;
+    while (fread(&listadoTratamento, sizeof(Tratamento), 1, tratamentos) == 1)
+    {
+        if (listadoTratamento.codigoBruxo == codigoBruxo)
+        {
+            (*tratamentosBruxo)[count] = listadoTratamento.codigoTratamento;
             count++;
         }
     }
@@ -230,91 +240,115 @@ int ListarTratamentosBruxo(int codigoBruxo, int** tratamentosBruxo)
 
 int AmpliarTratamento(int codigoTratamento, int duracaoAdicional, int dosagemAdicional)
 {
-    for (int i = 0; i < qtdTratamentos; i++)
-	{
-        if (tratamentos[i].codigoTratamento == codigoTratamento)
-		{
-			tratamentos[i].dosagem += dosagemAdicional;
-            tratamentos[i].duracao += duracaoAdicional;
+    if (!tratamentos)
+    {
+        return 0;
+    }
+
+    Tratamento ampliadoTratamento;
+
+    fseek(tratamentos, 0, SEEK_SET);
+
+    while (fread(&ampliadoTratamento, sizeof(Tratamento), 1, tratamentos) == 1)
+    {
+        if (ampliadoTratamento.codigoTratamento == codigoTratamento)
+        {
+            ampliadoTratamento.dosagem += dosagemAdicional;
+            ampliadoTratamento.duracao += duracaoAdicional;
+
+            fseek(tratamentos, sizeof(Tratamento), SEEK_CUR);
+            fwrite(&ampliadoTratamento, sizeof(Tratamento), 1, tratamentos);
+
             return 1;
         }
     }
-    return 0; // Tratamento não encontrado
+
+    return 0;
 }
 
 int VerificarTratamentosVinculadosAoBruxo(int codigoBruxo)
 {
-    for (int i = 0; i < qtdTratamentos; i++)
+    if (!tratamentos)
     {
-        if (tratamentos[i].codigoBruxo == codigoBruxo)
+        return 0;
+    }
+
+    fseek(tratamentos, 0, SEEK_SET);
+
+    Tratamento verificadoTratamento;
+    while (fread(&verificadoTratamento, sizeof(Tratamento), 1, tratamentos) == 1)
+    {
+        if (verificadoTratamento.codigoBruxo == codigoBruxo)
         {
-            return 1; // Existe pelo menos um tratamento vinculado ao bruxo
+            return 1;
         }
     }
-    return 0; // Não há tratamentos vinculados ao bruxo
+
+    return 0;
 }
 
 int VerificarTratamentosVinculadosAoPaciente(int codigoPaciente)
 {
-    for (int i = 0; i < qtdTratamentos; i++)
+    if (!tratamentos)
     {
-        if (tratamentos[i].codigoPaciente == codigoPaciente)
-        {
-            return 1; // Existe pelo menos um tratamento vinculado ao bruxo
-        }
+        return 0;
     }
-    return 0; // Não há tratamentos vinculados ao bruxo
-}
 
-int VerificarTratamentosVinculadosAPocao(int codigoPocao)
-{
-    for (int i = 0; i < qtdTratamentos; i++)
+    fseek(tratamentos, 0, SEEK_SET);
+
+    Tratamento verificadoTratamento;
+    while (fread(&verificadoTratamento, sizeof(Tratamento), 1, tratamentos) == 1)
     {
-        if (tratamentos[i].codigoPocao == codigoPocao)
+        if (verificadoTratamento.codigoPaciente == codigoPaciente)
         {
-            return 1; // Existe pelo menos um tratamento vinculado ao bruxo
+            return 1;
         }
     }
-    return 0; // Não há tratamentos vinculados ao bruxo
+
+    return 0;
 }
 
 int ExcluirTratamento(int codigoTratamento)
 {
-    int indiceParaRemover = -1;
-    for (int i = 0; i < qtdTratamentos; i++)
-	{
-        if (tratamentos[i].codigoTratamento == codigoTratamento)
-		{
-            indiceParaRemover = i;
-            break;
+    if (!tratamentos)
+    {
+        return 0;
+    }
+
+    Tratamento apagadoTratamento;
+
+    FILE* temp = fopen("temp_tratamentos.bin", "wb+");
+    if (!temp)
+    {
+        return 0;
+    }
+
+    int verificacao = 0;
+
+    fseek(tratamentos, 0, SEEK_SET);
+
+    while (fread(&apagadoTratamento, sizeof(Tratamento), 1, tratamentos) == 1)
+    {
+        if (apagadoTratamento.codigoTratamento != codigoTratamento)
+        {
+            fwrite(&apagadoTratamento, sizeof(Tratamento), 1, temp);
+        }
+        else
+        {
+            verificacao = 1;
         }
     }
 
-    if (indiceParaRemover != -1)
+    fclose(tratamentos);
+    fclose(temp);
+
+    if (remove("tratamentos.bin") != 0 || rename("temp.bin", "tratamentos.bin") != 0)
 	{
-        // Movendo os tratamentos à direita do índice para preencher a lacuna
-        for (int i = indiceParaRemover; i < qtdTratamentos - 1; i++)
-		{
-            tratamentos[i] = tratamentos[i + 1];
-        }
-
-        qtdTratamentos--;
-
-        // Verificar a ocupação e reduzir o array se necessário
-        if (qtdTratamentos < MAX_TRATAMENTOS / 2.5)
-		{
-			int temp_MAX_TRATAMENTOS = MAX_TRATAMENTOS;
-            MAX_TRATAMENTOS /= 2.5;
-            Tratamento* temp = (Tratamento*)realloc(tratamentos, MAX_TRATAMENTOS * sizeof(Tratamento));
-            if (temp != NULL)
-			{
-                tratamentos = temp;
-            } else {
-            	MAX_TRATAMENTOS = temp_MAX_TRATAMENTOS;
-			}
-        }
-        return 1;
+        return 0;
     }
-    return 0; // Tratamento com o código especificado não encontrado
+
+    tratamentos = fopen("tratamentos.bin", "rb+");
+
+    return verificacao;
 }
 
