@@ -7,6 +7,8 @@ typedef struct {
     char* tipo;
 } Pocao;
 
+extern Pocao* pocoes;
+
 int InicializarPocoes();
 int EncerrarPocoes();
 int VerificarCodigoPocao(int codigo);
