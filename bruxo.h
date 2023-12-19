@@ -1,14 +1,11 @@
 #ifndef BRUXO_H
 #define BRUXO_H
 
-
 typedef struct {
     int codigo;
     char* nome;
     char* especialidade;
 } Bruxo;
-
-extern Bruxo* bruxos;
 
 int InicializarBruxos();
 int EncerrarBruxos();

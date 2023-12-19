@@ -40,10 +40,9 @@ int main(int argc, char *argv[]) {
 
     if (resultado == 0)
 	{
-        printf("Falha na inicializacao de pelo menos uma entidade. Encerrando programa.\n"); // Encerra o programa
-		return 0;
+        printf("Os arquivos ainda nao existentes foram criados!\n"); // Encerra o programa
     } else {
-        printf("Todas as entidades foram inicializadas com sucesso.\n"); // Continua o programa
+        printf("Todas os arquivos foram inicializadas com sucesso.\n"); // Continua o programa
     }
     
 	int opcao = -1;
@@ -61,6 +60,9 @@ int main(int argc, char *argv[]) {
         switch (opcao) {
             case 0:
                 printf("Saindo do programa...\n");
+                free(nome);
+                free(especialidade);
+                free(tipo);
                 EncerrarTudo(); // Encerra as estruturas
                 break;
             case 1:
@@ -173,18 +175,20 @@ void menuBruxo()
 		    	break;
                 /////////////////////////////////////////////////////////////////////////////////
             case 2: // Cadastrar bruxo
-    			codigo = get_int_input("Digite o codigo do Bruxo: ");
-                nome = get_string_input("Digite o nome do Bruxo: ");
-                especialidade = get_string_input("Digite a especialidade do Bruxo: ");
-                novoBruxo.codigo = codigo;
-                novoBruxo.nome = nome;
-                novoBruxo.especialidade = especialidade;
-                
+				novoBruxo.codigo = get_int_input("Digite o codigo do Bruxo: ");
+				novoBruxo.nome = get_string_input("Digite o nome do Bruxo: ");
+				novoBruxo.especialidade = get_string_input("Digite a especialidade do Bruxo: ");
+				
 				resultadoCadastro = SalvarBruxo(novoBruxo);
-                if (resultadoCadastro == 0)
+				
+				if (resultadoCadastro == 0)
 				{
-                    printf("Código já existente. Por favor, insira um código diferente.\n");
-                }
+				    printf("Código já existente. Por favor, insira um código diferente.\n");
+				}
+				else
+				{
+					printf("Bruxo cadastrado com sucesso!\n");
+				}
                 break;
             case 3: // Alterar bruxo
 			    codigo = get_int_input("Digite o código do Bruxo que deseja atualizar: ");
@@ -291,7 +295,7 @@ void menuPaciente()
             case 2: // Cadastrar paciente
                 codigo = get_int_input("Digite o código do Paciente: ");
                 nome = get_string_input("Digite o nome do Paciente: ");
-                idade = get_int_input("Digite a idade do Paciente: ");
+                idade = get_int_input("Digite a idade do Paciente(em x,xx): ");
                 altura = get_float_input("Digite a altura do Paciente: ");
                 Paciente novoPaciente;
                 novoPaciente.codigo = codigo;
@@ -465,6 +469,8 @@ void menuTratamento()
                 // Retorna ao menu anterior
                 break;
 			case 1:
+				{
+				char nome2[100];
 			    codigo = get_int_input("Digite o código do Paciente para listar os tratamentos: ");
 			    int* tratamentosPaciente = NULL;
 				int totalTratamentosPaciente = ListarTratamentosPaciente(codigo, &tratamentosPaciente);
@@ -478,23 +484,32 @@ void menuTratamento()
 			             {
 			             	printf("Codigo do Tratamento: %d\n", tratamento->codigoTratamento);
                             printf("Codigo do Paciente: %d\n", tratamento->codigoPaciente);
-							if (ObterNomePaciente(tratamento->codigoPaciente, nome))
+							if (ObterNomePaciente(tratamento->codigoPaciente, nome2))
 							{
-							    printf("Nome do Paciente: %s\n", nome);
-							    free(nome);
+							    printf("Nome do Paciente: %s\n", nome2);
 							}
                             printf("Codigo do Bruxo: %d\n", tratamento->codigoBruxo);
-							if (ObterNomeBruxo(tratamento->codigoBruxo, nome))
+							if (ObterNomeBruxo(tratamento->codigoBruxo, nome2))
 							{
+<<<<<<< HEAD
 							    printf("Nome do Bruxo: %s\n", nome);
 							    free(nome);
 							}                            
+=======
+							    printf("Nome do Bruxo: %s\n", nome2);
+							}
+>>>>>>> f76269c562378bd5f8e5ee9b60a60cf6ac50e83b
 							printf("Codigo da Pocao: %d\n", tratamento->codigoPocao);
-							if (ObterNomePocao(tratamento->codigoPocao, nome))
+							if (ObterNomePocao(tratamento->codigoPocao, nome2))
 							{
+<<<<<<< HEAD
 							    printf("Nome da Pocao: %s\n", nome);
 							    free(nome);
 							}                            
+=======
+							    printf("Nome da Pocao: %s\n", nome2);
+							}
+>>>>>>> f76269c562378bd5f8e5ee9b60a60cf6ac50e83b
 							printf("Dosagem: %d\n", tratamento->dosagem);
                             printf("Duracao: %d dias\n\n", tratamento->duracao);
                             LiberarCopiaTratamento(tratamento);
@@ -506,7 +521,10 @@ void menuTratamento()
 			        printf("Nenhum tratamento encontrado para o Paciente %d.\n", codigo);
 			    }
 			    break;
+				}
 			case 2:
+				{
+				char nome2[100];
 			    codigo = get_int_input("Digite o código do Bruxo para listar os tratamentos: ");
 			    int* tratamentosBruxo = NULL;
 				int totalTratamentosBruxo = ListarTratamentosBruxo(codigo, &tratamentosBruxo);
@@ -520,22 +538,25 @@ void menuTratamento()
 			             {
 			             	printf("Codigo do Tratamento: %d\n", tratamento->codigoTratamento);
                             printf("Codigo do Paciente: %d\n", tratamento->codigoPaciente);
-							if (ObterNomePaciente(tratamento->codigoPaciente, nome))
+							if (ObterNomePaciente(tratamento->codigoPaciente, nome2))
 							{
-							    printf("Nome do Paciente: %s\n", nome);
-							    free(nome);
+							    printf("Nome do Paciente: %s\n", nome2);
 							}
                             printf("Codigo do Bruxo: %d\n", tratamento->codigoBruxo);
-							if (ObterNomeBruxo(tratamento->codigoBruxo, nome))
+							if (ObterNomeBruxo(tratamento->codigoBruxo, nome2))
 							{
+<<<<<<< HEAD
 							    printf("Nome do Bruxo: %s\n", nome);
 							    free(nome);
 							}                            
+=======
+							    printf("Nome do Bruxo: %s\n", nome2);
+							}
+>>>>>>> f76269c562378bd5f8e5ee9b60a60cf6ac50e83b
 							printf("Codigo da Pocao: %d\n", tratamento->codigoPocao);
-							if (ObterNomePocao(tratamento->codigoPocao, nome))
+							if (ObterNomePocao(tratamento->codigoPocao, nome2))
 							{
-							    printf("Nome da Pocao: %s\n", nome);
-							    free(nome);
+							    printf("Nome da Pocao: %s\n", nome2);
 							}
 							printf("Dosagem: %d\n", tratamento->dosagem);
                             printf("Duracao: %d dias\n\n", tratamento->duracao);
@@ -550,6 +571,7 @@ void menuTratamento()
 			    free(tratamentosBruxo);
 				tratamentosBruxo = NULL;
 			    break;
+				}
 			case 3:
 			    {
 			    	int codTratamento = 0;

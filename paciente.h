@@ -8,8 +8,6 @@ typedef struct {
     float altura;
 } Paciente;
 
-extern Paciente* pacientes;
-
 int InicializarPacientes();
 int EncerrarPacientes();
 int VerificarCodigoPaciente(int codigo);
