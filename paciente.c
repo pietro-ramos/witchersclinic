@@ -4,14 +4,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-FILE* pacientes = NULL;
+Paciente* pacientes = NULL;
+int MAX_PACIENTES = 5;
+int qtdPacientes = 0;
 
 int InicializarPacientes()
 {
-    pacientes = fopen("pacientes.bin", "rb+");
-    if (!pacientes)
+    pacientes = (Paciente*)calloc(MAX_PACIENTES, sizeof(Paciente));
+    if (pacientes == NULL)
     {
-        pacientes = fopen("pacientes.bin", "wb+");
         return 0;
     }
     return 1;
@@ -21,8 +22,14 @@ int EncerrarPacientes()
 {
     if (pacientes != NULL)
     {
-        fclose(pacientes);
+    	for(int i = 0; i < qtdPacientes; i++)
+    	{
+    		free(pacientes[i].nome);
+		}
+        free(pacientes);
         pacientes = NULL;
+        MAX_PACIENTES = 0;
+        qtdPacientes = 0;
         return 1;
     }
     return 0;
@@ -30,11 +37,9 @@ int EncerrarPacientes()
 
 int VerificarCodigoPaciente(int codigo)
 {
-    Paciente* verificaPaciente;
-    fseek(pacientes, 0, SEEK_SET); // Move para início do arquivo
-    while (fread(&verificaPaciente, sizeof(Paciente), 1, pacientes) == 1)
+    for (int i = 0; i < qtdPacientes; i++)
     {
-        if (verificaPaciente->codigo == codigo)
+        if (pacientes[i].codigo == codigo)
         {
             return 1; // Código já existe na lista de pacientes
         }
@@ -44,7 +49,7 @@ int VerificarCodigoPaciente(int codigo)
 
 int SalvarPaciente(Paciente p)
 {
-    if (!pacientes)
+    if (pacientes == NULL)
     {
         return 0;
     }
@@ -53,51 +58,43 @@ int SalvarPaciente(Paciente p)
     {
         return 0;
     }
-    
-    // Aloca memória dinâmica para as strings da estrutura Paciente
-    p.nome = strdup(p.nome);
 
-    fseek(pacientes, 0, SEEK_END);  // Move para o final do arquivo
-    fwrite(&p, sizeof(Paciente), 1, pacientes);
+    if (qtdPacientes == MAX_PACIENTES)
+    {
+        // Amplia o array usando realloc
+        MAX_PACIENTES += 5;
+        Paciente* temp = (Paciente*)realloc(pacientes, MAX_PACIENTES * sizeof(Paciente));
+        if (temp == NULL)
+        {
+        	MAX_PACIENTES -= 5;
+            return 0; // Não foi possível ampliar o array
+        }
+        pacientes = temp;
+    }
 
+    pacientes[qtdPacientes] = p;
+    qtdPacientes++;
     return 1;
 }
 
 int QuantidadePacientes()
 {
-    if (!pacientes)
-    {
-        return 0;
-    }
-
-    Paciente countPacientes;
-    fseek(pacientes, 0, SEEK_SET); // Move para início do arquivo
-    int quantidade = 0;
-
-    while (fread(&countPacientes, sizeof(Paciente), 1, pacientes) == 1)
-    {
-        quantidade++;
-    }
-
-    return quantidade;
+    return qtdPacientes;
 }
 
 Paciente* ObterPacientePeloIndice(int indice)
 {
-    if (indice >= 0 && indice < QuantidadePacientes())
-    {
+    if (indice >= 0 && indice < qtdPacientes) {
         Paciente* copiaPaciente = (Paciente*)malloc(sizeof(Paciente));
-        fseek(pacientes, indice * sizeof(Paciente), SEEK_SET);  // Move para a posição do registro
 
-        if (!copiaPaciente)
-        {
+        if (copiaPaciente == NULL) {
             return NULL;
         }
-        
-        fread(copiaPaciente, sizeof(Paciente), 1, pacientes);
-        
-        // Aloca memória dinâmica para as strings da estrutura Paciente
-    	copiaPaciente->nome = strdup(copiaPaciente->nome);
+
+        copiaPaciente->codigo = pacientes[indice].codigo;
+        copiaPaciente->nome = strdup(pacientes[indice].nome);
+        copiaPaciente->idade = pacientes[indice].idade;
+        copiaPaciente->altura = pacientes[indice].altura;
 
         return copiaPaciente;
     }
@@ -106,8 +103,7 @@ Paciente* ObterPacientePeloIndice(int indice)
 
 void LiberarCopiaPaciente(Paciente* copiaPaciente)
 {
-    if (copiaPaciente != NULL)
-    {
+    if (copiaPaciente != NULL) {
         free(copiaPaciente->nome);
         free(copiaPaciente);
     }
@@ -115,79 +111,36 @@ void LiberarCopiaPaciente(Paciente* copiaPaciente)
 
 Paciente* ObterPacientePeloCodigo(int codigo)
 {
-    Paciente obterPaciente;
-    fseek(pacientes, 0, SEEK_SET); // Move para início do arquivo.
-
-    while (fread(&obterPaciente, sizeof(Paciente), 1, pacientes) == 1)
+    for (int i = 0; i < qtdPacientes; i++)
     {
-        if (obterPaciente.codigo == codigo)
+        if (pacientes[i].codigo == codigo)
         {
-            Paciente* copiaPaciente = (Paciente*)malloc(sizeof(Paciente));
-            if (!copiaPaciente)
-            {
-                return NULL;
-            }
-
-            *copiaPaciente = obterPaciente;
-            return copiaPaciente;
+            return &pacientes[i];
         }
     }
-
     return NULL;
 }
 
 int AtualizarPaciente(Paciente p)
 {
-    if (!pacientes)
-    {
-        return 0;
+    Paciente* pacienteExistente = ObterPacientePeloCodigo(p.codigo);
+
+    if (pacienteExistente != NULL) {
+        free(pacienteExistente->nome); // Libera a memória do nome existente
+        pacienteExistente->nome = strdup(p.nome);
+        pacienteExistente->idade = p.idade;
+        pacienteExistente->altura = p.altura;
+
+        return 1;
     }
-
-    Paciente pacienteExistente;
-
-    FILE* temp = fopen("temp.bin", "wb+");
-    if (!temp)
-    {
-        return 0;
-    }
-
-    int verificacao = 0;
-
-    fseek(pacientes, 0, SEEK_SET); // Move para início do arquivo
-
-    while (fread(&pacienteExistente, sizeof(Paciente), 1, pacientes) == 1)
-    {
-        if (pacienteExistente.codigo != p.codigo)
-        {
-            fwrite(&pacienteExistente, sizeof(Paciente), 1, temp);
-        }
-        else
-        {
-        	// Atualiza o pacienteExistente com os novos dados
-        	pacienteExistente = p;
-        	fwrite(&pacienteExistente, sizeof(Paciente), 1, temp);
-
-            verificacao = 1; // Paciente com o código especificado encontrado
-        }
-    }
-
-    fclose(pacientes);
-    fclose(temp);
-
-    remove("pacientes.bin");
-    rename("temp.bin", "pacientes.bin");
-
-    pacientes = fopen("pacientes.bin", "rb+");
-
-    return verificacao;
+    return 0; // Paciente com o código especificado não encontrado
 }
 
 int ModificarPacientePeloCodigo(int codigo, const char* novoNome, int novaIdade, float novaAltura)
 {
     Paciente* pacienteParaAtualizar = ObterPacientePeloCodigo(codigo);
 
-    if (pacienteParaAtualizar != NULL)
-    {
+    if (pacienteParaAtualizar != NULL) {
         free(pacienteParaAtualizar->nome); // Libera a memória do nome existente
         pacienteParaAtualizar->nome = strdup(novoNome);
         pacienteParaAtualizar->idade = novaIdade;
@@ -198,47 +151,50 @@ int ModificarPacientePeloCodigo(int codigo, const char* novoNome, int novaIdade,
     return 0; // Paciente com o código especificado não encontrado
 }
 
+
 int ApagarPacientePeloCodigo(int codigo)
 {
-    if (!pacientes)
+    int indiceParaRemover = -1;
+    for (int i = 0; i < qtdPacientes; i++)
     {
-        return 0;
-    }
-
-    Paciente apagadoPaciente;
-
-    FILE* temp = fopen("temp.bin", "wb+");
-    if (!temp)
-    {
-        return 0;
-    }
-
-    int verificacao = 0;
-
-    fseek(pacientes, 0, SEEK_SET); // Move para início do arquivo
-
-    while (fread(&apagadoPaciente, sizeof(Paciente), 1, pacientes) == 1)
-    {
-        if (apagadoPaciente.codigo != codigo)
+        if (pacientes[i].codigo == codigo)
         {
-            fwrite(&apagadoPaciente, sizeof(Paciente), 1, temp);
-        }
-        else
-        {
-            verificacao = 1; // Paciente com o código especificado encontrado
+            indiceParaRemover = i;
+            break;
         }
     }
 
-    fclose(pacientes);
-    fclose(temp);
+    if (indiceParaRemover != -1)
+    {
+    	if (VerificarTratamentosVinculadosAoPaciente(codigo))
+		{
+			printf("Não é possível excluir o paciente, pois ha tratamentos vinculados.\n");
+		    return 0;
+		}
+        free(pacientes[indiceParaRemover].nome);
 
-    if (remove("pacientes.bin") != 0 || rename("temp.bin", "pacientes.bin") != 0)
-	{
-        return 0;
+        // Movendo os pacientes à direita do índice para preencher a lacuna
+        for (int i = indiceParaRemover; i < qtdPacientes - 1; i++)
+        {
+            pacientes[i] = pacientes[i + 1];
+        }
+
+        qtdPacientes--;
+
+        // Verificar a ocupação e reduzir o array se necessário
+        if (qtdPacientes < MAX_PACIENTES / 2.5)
+        {
+        	int temp_MAX_PACIENTES = MAX_PACIENTES;
+            MAX_PACIENTES /= 2.5;
+            Paciente* temp = (Paciente*)realloc(pacientes, MAX_PACIENTES * sizeof(Paciente));
+            if (temp != NULL) {
+                pacientes = temp;
+            } else {
+            	MAX_PACIENTES = temp_MAX_PACIENTES;
+			}
+        }
+        return 1;
     }
-
-    pacientes = fopen("pacientes.bin", "rb+");
-
-    return verificacao;
+    return 0; // Paciente com o código especificado não encontrado
 }
 

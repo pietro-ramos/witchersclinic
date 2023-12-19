@@ -4,14 +4,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-FILE* pocoes = NULL;
+Pocao* pocoes = NULL;
+int MAX_POCOES = 5;
+int qtdPocoes = 0;
 
 int InicializarPocoes()
 {
-    pocoes = fopen("pocoes.bin", "rb+");
-    if (!pocoes)
+    pocoes = (Pocao*)calloc(MAX_POCOES, sizeof(Pocao));
+    if (pocoes == NULL)
     {
-        pocoes = fopen("pocoes.bin", "wb+");
         return 0;
     }
     return 1;
@@ -21,8 +22,15 @@ int EncerrarPocoes()
 {
     if (pocoes != NULL)
     {
-        fclose(pocoes);
+    	for(int i = 0; i < qtdPocoes; i++)
+    	{
+    		free(pocoes[i].nome);
+    		free(pocoes[i].tipo);
+		}
+        free(pocoes);
         pocoes = NULL;
+        MAX_POCOES = 0;
+        qtdPocoes = 0;
         return 1;
     }
     return 0;
@@ -30,21 +38,19 @@ int EncerrarPocoes()
 
 int VerificarCodigoPocao(int codigo)
 {
-    Pocao verificaPocao;
-    fseek(pocoes, 0, SEEK_SET); // Move para início do arquivo
-    while (fread(&verificaPocao, sizeof(Pocao), 1, pocoes) == 1)
+    for (int i = 0; i < qtdPocoes; i++)
     {
-        if (verificaPocao.codigo == codigo)
+        if (pocoes[i].codigo == codigo)
         {
-            return 1; // Código já existe na lista de pocoes
+            return 1; // Código já existe na lista de poções
         }
     }
-    return 0; // Código não encontrado na lista de pocoes
+    return 0; // Código não encontrado na lista de poções
 }
 
 int SalvarPocao(Pocao p)
 {
-    if (!pocoes)
+    if (pocoes == NULL)
     {
         return 0;
     }
@@ -54,52 +60,40 @@ int SalvarPocao(Pocao p)
         return 0;
     }
 
-    // Aloca memória dinâmica para as strings da estrutura Pocao
-    p.nome = strdup(p.nome);
-    p.tipo = strdup(p.tipo);
+    if (qtdPocoes == MAX_POCOES)
+    {
+        // Amplia o array usando realloc
+        MAX_POCOES += 5;
+        Pocao* temp = (Pocao*)realloc(pocoes, MAX_POCOES * sizeof(Pocao));
+        if (temp == NULL)
+        {
+            return 0; // Não foi possível ampliar o array
+        }
+        pocoes = temp;
+    }
 
-    fseek(pocoes, 0, SEEK_END);  // Move para o final do arquivo
-    fwrite(&p, sizeof(Pocao), 1, pocoes);
-
+    pocoes[qtdPocoes] = p;
+    qtdPocoes++;
     return 1;
 }
 
 int QuantidadePocoes()
 {
-    if (!pocoes)
-    {
-        return 0;
-    }
-
-    Pocao countPocoes;
-    fseek(pocoes, 0, SEEK_SET); // Move para início do arquivo
-    int quantidade = 0;
-
-    while (fread(&countPocoes, sizeof(Pocao), 1, pocoes) == 1)
-    {
-        quantidade++;
-    }
-
-    return quantidade;
+    return qtdPocoes;
 }
 
 Pocao* ObterPocaoPeloIndice(int indice)
 {
-    if (indice >= 0 && indice < QuantidadePocoes())
-    {
+    if (indice >= 0 && indice < qtdPocoes) {
         Pocao* copiaPocao = (Pocao*)malloc(sizeof(Pocao));
-        fseek(pocoes, indice * sizeof(Pocao), SEEK_SET);  // Move para a posição do registro
 
-        if (!copiaPocao)
-        {
+        if (copiaPocao == NULL) {
             return NULL;
         }
 
-        fread(copiaPocao, sizeof(Pocao), 1, pocoes);
-
-        // Alocação de memória para as strings
-        copiaPocao->nome = strdup(copiaPocao->nome);
-        copiaPocao->tipo = strdup(copiaPocao->tipo);
+        copiaPocao->codigo = pocoes[indice].codigo;
+        copiaPocao->nome = strdup(pocoes[indice].nome);
+        copiaPocao->tipo = strdup(pocoes[indice].tipo);
 
         return copiaPocao;
     }
@@ -108,8 +102,7 @@ Pocao* ObterPocaoPeloIndice(int indice)
 
 void LiberarCopiaPocao(Pocao* copiaPocao)
 {
-    if (copiaPocao != NULL)
-    {
+    if (copiaPocao != NULL) {
         free(copiaPocao->nome);
         free(copiaPocao->tipo);
         free(copiaPocao);
@@ -118,79 +111,37 @@ void LiberarCopiaPocao(Pocao* copiaPocao)
 
 Pocao* ObterPocaoPeloCodigo(int codigo)
 {
-    Pocao obterPocao;
-    fseek(pocoes, 0, SEEK_SET); // Move para início do arquivo.
-
-    while (fread(&obterPocao, sizeof(Pocao), 1, pocoes) == 1)
+    for (int i = 0; i < qtdPocoes; i++)
     {
-        if (obterPocao.codigo == codigo)
+        if (pocoes[i].codigo == codigo)
         {
-            Pocao* copiaPocao = (Pocao*)malloc(sizeof(Pocao));
-            if (!copiaPocao)
-            {
-                return NULL;
-            }
-
-            *copiaPocao = obterPocao;
-            return copiaPocao;
+            return &pocoes[i];
         }
     }
-
     return NULL;
 }
 
 int AtualizarPocao(Pocao p)
 {
-    if (!pocoes)
-    {
-        return 0;
+    Pocao* pocaoExistente = ObterPocaoPeloCodigo(p.codigo);
+
+    if (pocaoExistente != NULL) {
+        free(pocaoExistente->nome); // Libera a memória do nome existente
+        free(pocaoExistente->tipo); // Libera a memória do tipo existente
+
+        pocaoExistente->nome = strdup(p.nome);
+        pocaoExistente->tipo = strdup(p.tipo);
+
+        return 1;
     }
-
-    Pocao pocaoExistente;
-
-    FILE* temp = fopen("temp.bin", "wb+");
-    if (!temp)
-    {
-        return 0;
-    }
-
-    int verificacao = 0;
-
-    fseek(pocoes, 0, SEEK_SET); // Move para início do arquivo
-
-    while (fread(&pocaoExistente, sizeof(Pocao), 1, pocoes) == 1)
-    {
-        if (pocaoExistente.codigo != p.codigo)
-        {
-            fwrite(&pocaoExistente, sizeof(Pocao), 1, temp);
-        }
-        else
-        {
-            // Atualiza o pocaoExistente com os novos dados
-            pocaoExistente = p;
-            fwrite(&pocaoExistente, sizeof(Pocao), 1, temp);
-
-            verificacao = 1; // Pocao com o código especificado encontrado
-        }
-    }
-
-    fclose(pocoes);
-    fclose(temp);
-
-    remove("pocoes.bin");
-    rename("temp.bin", "pocoes.bin");
-
-    pocoes = fopen("pocoes.bin", "rb+");
-
-    return verificacao;
+    return 0; // Poção com o código especificado não encontrado
 }
 
 int ModificarPocaoPeloCodigo(int codigo, const char* novoNome, const char* novoTipo)
 {
     Pocao* pocaoParaAtualizar = ObterPocaoPeloCodigo(codigo);
 
-    if (pocaoParaAtualizar != NULL)
-    {
+    if (pocaoParaAtualizar != NULL) {
         free(pocaoParaAtualizar->nome); // Libera a memória do nome existente
         free(pocaoParaAtualizar->tipo); // Libera a memória do tipo existente
 
@@ -199,50 +150,53 @@ int ModificarPocaoPeloCodigo(int codigo, const char* novoNome, const char* novoT
 
         return AtualizarPocao(*pocaoParaAtualizar);
     }
-    return 0; // Pocao com o código especificado não encontrado
+    return 0; // Poção com o código especificado não encontrada
 }
 
 int ApagarPocaoPeloCodigo(int codigo)
 {
-    if (!pocoes)
+    int indiceParaRemover = -1;
+    for (int i = 0; i < qtdPocoes; i++)
     {
-        return 0;
-    }
-
-    Pocao apagadaPocao;
-
-    FILE* temp = fopen("temp.bin", "wb+");
-    if (!temp)
-    {
-        return 0;
-    }
-
-    int verificacao = 0;
-
-    fseek(pocoes, 0, SEEK_SET); // Move para início do arquivo
-
-    while (fread(&apagadaPocao, sizeof(Pocao), 1, pocoes) == 1)
-    {
-        if (apagadaPocao.codigo != codigo)
+        if (pocoes[i].codigo == codigo)
         {
-            fwrite(&apagadaPocao, sizeof(Pocao), 1, temp);
-        }
-        else
-        {
-            verificacao = 1; // Pocao com o código especificado encontrado
+            indiceParaRemover = i;
+            break;
         }
     }
 
-    fclose(pocoes);
-    fclose(temp);
-
-    if (remove("pocoes.bin") != 0 || rename("temp.bin", "pocoes.bin") != 0)
+    if (indiceParaRemover != -1)
     {
-        return 0;
+    	if (VerificarTratamentosVinculadosAPocao(codigo))
+		{
+			printf("Não é possível excluir a pocao, pois ha tratamentos vinculados.\n");
+		    return 0;
+		}
+        free(pocoes[indiceParaRemover].nome);
+        free(pocoes[indiceParaRemover].tipo);
+
+        // Movendo as poções à direita do índice para preencher a lacuna
+        for (int i = indiceParaRemover; i < qtdPocoes - 1; i++)
+        {
+            pocoes[i] = pocoes[i + 1];
+        }
+
+        qtdPocoes--;
+
+        // Verificar a ocupação e reduzir o array se necessário
+        if (qtdPocoes < MAX_POCOES / 2.5)
+        {
+        	int temp_MAX_POCOES = MAX_POCOES;
+            MAX_POCOES /= 2.5;
+            Pocao* temp = (Pocao*)realloc(pocoes, MAX_POCOES * sizeof(Pocao));
+            if (temp != NULL) {
+                pocoes = temp;
+            } else {
+            	MAX_POCOES = temp_MAX_POCOES;
+			}
+        }
+        return 1;
     }
-
-    pocoes = fopen("pocoes.bin", "rb+");
-
-    return verificacao;
+    return 0; // Poção com o código especificado não encontrado
 }
 

@@ -12,7 +12,6 @@ typedef struct {
 
 int InicializarTratamentos();
 int EncerrarTratamentos();
-int QuantidadeTratamentos();
 int CodigoPacienteValido(int codigo);
 int CodigoBruxoValido(int codigo);
 int CodigoPocaoValido(int codigo);
@@ -20,6 +19,7 @@ int SalvarTratamento(Tratamento t);
 Tratamento* ObterTratamentoPeloIndice(int indice);
 void LiberarCopiaTratamento(Tratamento* copiaTratamento);
 Tratamento* ObterTratamentoPeloCodigo(int codigo);
+int AtualizarTratamento(Tratamento t);
 int ObterNomeBruxo(int codigo, char *nomeBruxo);
 int ObterNomePocao(int codigo, char *nomePocao);
 int ObterNomePaciente(int codigo, char *nomePaciente);

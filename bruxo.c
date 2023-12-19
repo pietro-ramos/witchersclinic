@@ -4,14 +4,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-FILE* bruxos = NULL;
+Bruxo* bruxos = NULL;
+int MAX_BRUXOS = 5;
+int qtdBruxos = 0;
 
 int InicializarBruxos()
 {
-    bruxos = fopen("bruxos.bin", "rb+");
-    if (!bruxos)
-    {
-        bruxos = fopen("bruxos.bin", "wb+");
+    bruxos = (Bruxo*)calloc(MAX_BRUXOS, sizeof(Bruxo));
+    if (bruxos == NULL)
+	{
         return 0;
     }
     return 1;
@@ -20,9 +21,17 @@ int InicializarBruxos()
 int EncerrarBruxos()
 {
     if (bruxos != NULL)
-    {
-        fclose(bruxos);
+	{
+		for(int i = 0; i < qtdBruxos;i++)
+		{
+			free(bruxos[i].nome);
+			free(bruxos[i].especialidade);
+		}
+		
+        free(bruxos);
         bruxos = NULL;
+        MAX_BRUXOS = 0;
+        qtdBruxos = 0;
         return 1;
     }
     return 0;
@@ -30,83 +39,62 @@ int EncerrarBruxos()
 
 int VerificarCodigoBruxo(int codigo)
 {
-	Bruxo verificaBruxo;
-	fseek(bruxos, 0, SEEK_SET); // Move para início do arquivo
-	while (fread(&verificaBruxo, sizeof(Bruxo), 1, bruxos) == 1)
+    for (int i = 0; i < qtdBruxos; i++)
 	{
-        if (verificaBruxo.codigo == codigo)
+        if (bruxos[i].codigo == codigo)
 		{
             return 1; // Código já existe na lista de bruxos
         }
-	}
-	return 0; // Código não encontrado na lista de bruxos
+    }
+    return 0; // Código não encontrado na lista de bruxos
 }
 
 int SalvarBruxo(Bruxo b)
 {
-    if (!bruxos)
-    {
+    if (bruxos == NULL)
+	{
         return 0;
     }
     
     if (VerificarCodigoBruxo(b.codigo))
 	{
-        return 0; // Código já existente na lista de bruxos
+    	return 0; 
+	}
+
+    if (qtdBruxos == MAX_BRUXOS)
+	{
+        // Amplia o array usando realloc
+        MAX_BRUXOS += 5;
+        Bruxo* temp = (Bruxo*)realloc(bruxos, MAX_BRUXOS * sizeof(Bruxo));
+        if (temp == NULL)
+		{
+			MAX_BRUXOS -=5;
+            return 0; // Não foi possível ampliar o array
+        }
+        bruxos = temp;
     }
 
-    // Aloca memória dinâmica para as strings da estrutura Bruxo
-    b.nome = strdup(b.nome);
-    b.especialidade = strdup(b.especialidade);
-
-    fseek(bruxos, 0, SEEK_END);  // Move para o final do arquivo
-    fwrite(&b, sizeof(Bruxo), 1, bruxos);
-	
+    bruxos[qtdBruxos] = b;
+    qtdBruxos++;
     return 1;
 }
 
 int QuantidadeBruxos()
 {
-	if (!bruxos)
-    {
-    	return 0;
-    }
-    
-	Bruxo countBruxos;
-	fseek(bruxos, 0, SEEK_SET); // Move para inicio do arquivo
-	int quantidade = 0;
-	
-	while (fread(&countBruxos, sizeof(Bruxo), 1, bruxos) == 1)
-	{
-		quantidade++;
-	}
-	    
-	return quantidade;
+    return qtdBruxos;
 }
 
 Bruxo* ObterBruxoPeloIndice(int indice)
-{   
-    if (indice >= 0 && indice < QuantidadeBruxos())
-    {
+{
+    if (indice >= 0 && indice < qtdBruxos) {
         Bruxo* copiaBruxo = (Bruxo*)malloc(sizeof(Bruxo));
-        fseek(bruxos, indice * sizeof(Bruxo), SEEK_SET);  // Move para a posição do registro
-        
-        if (!copiaBruxo)
-        {
+
+        if (copiaBruxo == NULL) {
             return NULL;
         }
-<<<<<<< HEAD
-//        *copiaBruxo = bruxos[indice];
         copiaBruxo->codigo = bruxos[indice].codigo;
         copiaBruxo->nome = strdup(bruxos[indice].nome);
         copiaBruxo->especialidade = strdup(bruxos[indice].especialidade);
-=======
-
-        fread(copiaBruxo, sizeof(Bruxo), 1, bruxos);
-
-        // Alocação de memória para as strings
-        copiaBruxo->nome = strdup(copiaBruxo->nome);
-        copiaBruxo->especialidade = strdup(copiaBruxo->especialidade);
->>>>>>> f76269c562378bd5f8e5ee9b60a60cf6ac50e83b
 
         return copiaBruxo;
     }
@@ -115,89 +103,47 @@ Bruxo* ObterBruxoPeloIndice(int indice)
 
 void LiberarCopiaBruxo(Bruxo* copiaBruxo)
 {
-    if (copiaBruxo != NULL)
-	{
+    if (copiaBruxo != NULL) {
         free(copiaBruxo->nome);
         free(copiaBruxo->especialidade);
         free(copiaBruxo);
     }
 }
 
+
 Bruxo* ObterBruxoPeloCodigo(int codigo)
 {
-	Bruxo obterBruxo;
-	fseek(bruxos, 0, SEEK_SET); // Move para início do arquivo.
-	
-    while (fread(&obterBruxo, sizeof(Bruxo), 1, bruxos) == 1)
-    {
-    	if (obterBruxo.codigo == codigo)
-    	{
-    		Bruxo* copiaBruxo = (Bruxo*)malloc(sizeof(Bruxo));
-    		if (!copiaBruxo)
-    		{
-    			return NULL;
-			}
-			
-			*copiaBruxo = obterBruxo;
-			return copiaBruxo;
-		}
-	}
-    
+    for (int i = 0; i < qtdBruxos; i++)
+	{
+        if (bruxos[i].codigo == codigo)
+		{
+            return &bruxos[i];
+        }
+    }
     return NULL;
 }
 
 int AtualizarBruxo(Bruxo b)
 {
-	if (!bruxos)
-    {
-    	return 0;
-    }
-    
-    Bruxo bruxoExistente;
-    
-    FILE* temp = fopen("temp.bin", "wb+");
-    if (!temp)
-    {
-    	return 0;
-	}
-    
-    int verificacao = 0;
-    
-    fseek(bruxos, 0, SEEK_SET); // Move para início do arquivo
+    Bruxo* bruxoExistente = ObterBruxoPeloCodigo(b.codigo);
 
-    while (fread(&bruxoExistente, sizeof(Bruxo), 1, bruxos) == 1)
-    {
-        if (bruxoExistente.codigo != b.codigo)
-        {
-            fwrite(&bruxoExistente, sizeof(Bruxo), 1, temp);
-        }
-        else
-        {
-            // Atualiza o bruxoExistente com os novos dados
-            bruxoExistente = b;
-            fwrite(&bruxoExistente, sizeof(Bruxo), 1, temp);
-            
-            verificacao = 1; // Bruxo com o código especificado encontrado
-        }
+    if (bruxoExistente != NULL) {
+        free(bruxoExistente->nome); // Libera a memória do nome existente
+        free(bruxoExistente->especialidade); // Libera a memória da especialidade existente
+
+        bruxoExistente->nome = strdup(b.nome);
+        bruxoExistente->especialidade = strdup(b.especialidade);
+
+        return 1;
     }
-    
-	fclose(bruxos);
-    fclose(temp);
-    
-    remove("bruxos.bin");
-    rename("temp.bin", "bruxos.bin");
-    
-    bruxos = fopen("bruxos.bin", "rb+");
-	
-    return verificacao;
+    return 0; // Bruxo com o código especificado não encontrado
 }
 
 int ModificarBruxoPeloCodigo(int codigo, const char* novoNome, const char* novaEspecialidade)
 {
     Bruxo* bruxoParaAtualizar = ObterBruxoPeloCodigo(codigo);
 
-    if (bruxoParaAtualizar != NULL)
-	{
+    if (bruxoParaAtualizar != NULL) {
         free(bruxoParaAtualizar->nome); // Libera a memória do nome existente
         free(bruxoParaAtualizar->especialidade); // Libera a memória da especialidade existente
 
@@ -211,45 +157,49 @@ int ModificarBruxoPeloCodigo(int codigo, const char* novoNome, const char* novaE
 
 int ApagarBruxoPeloCodigo(int codigo)
 {
-	if (!bruxos)
-    {
-    	return 0;
-    }
-    
-    Bruxo apagadoBruxo;
-    
-    FILE* temp = fopen("temp.bin", "wb+");
-    if (!temp)
-    {
-    	return 0;
-	}
-	
-    int verificacao = 0;
-    
-    fseek(bruxos, 0, SEEK_SET); // Move para início do arquivo
-    
-    while (fread(&apagadoBruxo, sizeof(Bruxo), 1, bruxos) == 1)
-    {
-        if (apagadoBruxo.codigo != codigo)
-        {
-            fwrite(&apagadoBruxo, sizeof(Bruxo), 1, temp);
-        }
-        else
-        {
-            verificacao = 1; // Bruxo com o código especificado encontrado
-        }
-    }
-    
-	fclose(bruxos);
-    fclose(temp);
-    
-    if (remove("bruxos.bin") != 0 || rename("temp.bin", "bruxos.bin") != 0)
+    int indiceParaRemover = -1;
+    for (int i = 0; i < qtdBruxos; i++)
 	{
-        return 0;
+        if (bruxos[i].codigo == codigo)
+		{
+            indiceParaRemover = i;
+            break;
+        }
     }
-    
-    bruxos = fopen("bruxos.bin", "rb+");
-	
-    return verificacao;
+
+    if (indiceParaRemover != -1)
+	{
+        if (VerificarTratamentosVinculadosAoBruxo(codigo))
+		{
+			printf("Não é possível excluir o bruxo, pois ha tratamentos vinculados.\n");
+		    return 0;
+		}
+		
+        free(bruxos[indiceParaRemover].nome);
+        free(bruxos[indiceParaRemover].especialidade);
+
+        // Movendo os bruxos à direita do índice para preencher a lacuna
+        for (int i = indiceParaRemover; i < qtdBruxos - 1; i++)
+		{
+            bruxos[i] = bruxos[i + 1];
+        }
+
+        qtdBruxos--;
+
+        // Verificar a ocupação e reduzir o array se necessário
+        if (qtdBruxos < MAX_BRUXOS / 2.5)
+		{
+			int temp_MAX_BRUXOS = MAX_BRUXOS;
+            MAX_BRUXOS /= 2.5;
+            Bruxo* temp = (Bruxo*)realloc(bruxos, MAX_BRUXOS * sizeof(Bruxo));
+            if (temp != NULL) {
+                bruxos = temp;
+            } else {
+            	MAX_BRUXOS = temp_MAX_BRUXOS;
+			}
+        }
+        return 1;
+    }
+    return 0; // Bruxo com o código especificado não encontrado
 }
 
