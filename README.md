@@ -1,6 +1,6 @@
 # witchersclinic
 
-This project, initially conceived as part of a college assignment, has now reached its final phase. The primary focus has been on implementing dynamic memory allocation and creating a robust data structure. The culmination of these efforts has resulted in two distinct programs, each addressing a specific aspect of the project – one with dynamic memory allocation and the other utilizing binary file handling.
+The primary focus has been on implementing dynamic memory allocation and creating a robust data structure. The culmination of these efforts has resulted in two distinct programs, each addressing a specific aspect of the project – one with dynamic memory allocation and the other utilizing binary file handling.
 The dynamic memory allocation program is a key component of this project. It enables efficient memory management, allowing for the creation and manipulation of a comprehensive data structure.
 
 Features:
