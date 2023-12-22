@@ -1,4 +1,9 @@
 # witchersclinic
 
-This project is part of a college assignment and is currently in its initial phase. The main goal at this stage is to establish the foundational groundwork for future development. The project incorporates dynamic memory allocation and a comprehensive data structure.
-Soon, the project will feature a database prototype using .txt/.bin, reading, writing, and modifying information related to the entities.
+This project, initially conceived as part of a college assignment, has now reached its final phase. The primary focus has been on implementing dynamic memory allocation and creating a robust data structure. The culmination of these efforts has resulted in two distinct programs, each addressing a specific aspect of the project – one with dynamic memory allocation and the other utilizing binary file handling.
+The dynamic memory allocation program is a key component of this project. It enables efficient memory management, allowing for the creation and manipulation of a comprehensive data structure.
+
+Features:
+Dynamic Memory Management: The program employs dynamic memory allocation to optimize resource utilization and facilitate scalability;
+Comprehensive Data Structure: A well-defined data structure forms the backbone of the program, providing a solid foundation for storing and managing information;
+Prototypical Database Operations: While this version doesn't feature a complete database, it lays the groundwork for future development by incorporating functionality for reading, writing, and modifying information related to entities.
