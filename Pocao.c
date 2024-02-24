@@ -22,11 +22,6 @@ int EncerrarPocoes()
 {
     if (pocoes != NULL)
     {
-    	for(int i = 0; i < qtdPocoes; i++)
-    	{
-    		free(pocoes[i].nome);
-    		free(pocoes[i].tipo);
-		}
         free(pocoes);
         pocoes = NULL;
         MAX_POCOES = 0;

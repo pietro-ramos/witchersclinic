@@ -22,10 +22,6 @@ int EncerrarPacientes()
 {
     if (pacientes != NULL)
     {
-    	for(int i = 0; i < qtdPacientes; i++)
-    	{
-    		free(pacientes[i].nome);
-		}
         free(pacientes);
         pacientes = NULL;
         MAX_PACIENTES = 0;

@@ -21,13 +21,7 @@ int InicializarBruxos()
 int EncerrarBruxos()
 {
     if (bruxos != NULL)
-	{
-		for(int i = 0; i < qtdBruxos;i++)
-		{
-			free(bruxos[i].nome);
-			free(bruxos[i].especialidade);
-		}
-		
+    {
         free(bruxos);
         bruxos = NULL;
         MAX_BRUXOS = 0;
@@ -36,6 +30,7 @@ int EncerrarBruxos()
     }
     return 0;
 }
+
 
 int VerificarCodigoBruxo(int codigo)
 {
